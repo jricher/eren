@@ -1,0 +1,1 @@
+EREN.docproj is a documentation project created with the (free, opensource) FlashBuilder IDE. To regenerate documentation, open FlashBuilder, and click on Tools > Flash Tools > Documentation generator. Select "Open project" and open EREN.docproj. Click "Generate!" to produce the documentation.

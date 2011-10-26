@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="utf-8"?>
+<eren:scenario xmlns:eren="urn:mitre:eren:1.0" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="atx_nflk">
+  <eren:name>Anthrax in Norfolk, VA</eren:name>
+  <eren:description>There has been an anthrax attack in Norfolk, VA. The Emergency Operations Center is being stood up.  A "push pack" of medications from the Strategic National Stockpile is on its way to your local airport.  You need to play a critical role in distributing these vital medications as soon as possible!</eren:description>
+  <eren:image>/resources/images/Locations/Norfolk.png</eren:image>
+  <eren:baseUrl>http://erenbus.mitre.org/FlashClient2/EREN</eren:baseUrl>
+
+  <eren:timing>
+    <eren:gametime>172800</eren:gametime>
+    <eren:walltime>1200</eren:walltime>
+    <eren:date>2010-09-13T12:00:00EST</eren:date>
+    <eren:ratio>12</eren:ratio>
+  </eren:timing>
+  
+  <!-- still undefined
+  <eren:actions>
+    <eren:action>
+      <eren:roleFilter>EOCdir</eren:roleFilter>
+      <eren:roleFilter>OpsChief</eren:roleFilter>
+      <eren:placeFilter>POD_01</eren:placeFilter>
+      <eren:placeFilter>POD_02</eren:placeFilter>
+      <eren:title>Open POD</eren:title>
+      <eren:sendToBus>
+      
+      </eren:sendToBus>
+    </eren:action>
+    <eren:action>
+      <eren:roleFilter>EOCdir</eren:roleFilter>
+      <eren:placeFilter>POD_03</eren:placeFilter>
+      <eren:placeFilter>POD_02</eren:placeFilter>
+      <eren:title>Open POD</eren:title>
+      <eren:sendToBus>
+      
+      </eren:sendToBus>
+    </eren:action>
+  </eren:actions>
+  -->
+  
+  <eren:roles>
+    <eren:role ID="EOCdir">
+	  <eren:image>/resources/images/NPCs/EOCdir.png</eren:image>
+      <eren:min>1</eren:min>
+      <eren:max>1</eren:max>
+      <eren:title>EOC director</eren:title>
+      <eren:description>The Director of the EOC will make important decisions about how resources are allocated during a Public health crisis.</eren:description>
+      <eren:briefing>The Director of the EOC will make important decisions about how resources are allocated during a Public health crisis. The Director of the EOC:
+- Develops Objectives
+- Prioritizes Needs
+- Trades off Competing Demands
+- Assigns Responsibilities
+- Approves Strategies
+- Directs Response
+- Integrates Major Actions
+- Coordinates Communication
+- Maintains Group Focus on Objective.</eren:briefing>
+    </eren:role>
+    <eren:role ID="OpsChief">
+	  <eren:image>/resources/images/NPCs/OpsChief.png</eren:image>
+      <eren:min>1</eren:min>
+      <eren:max>1</eren:max>
+      <eren:title>Operations Chief</eren:title>
+      <eren:description>The Operations Manager will decide how to achieve the goals set by the EOC Director, monitor progress, and make sure the response implemented is the most effective possible.</eren:description>
+      <eren:briefing>The Operations Manager will decide how to achieve the goals set by the EOC Director, monitor progress, and make sure the response implemented is the most effective possible. The Operations Manager:
+- Plans
+- Allocates resources
+- Tasks
+- Supervises
+- Sustains</eren:briefing>
+    </eren:role>
+    <eren:role ID="Comms">
+	  <eren:image>/resources/images/NPCs/Comms.png</eren:image>
+      <eren:min>1</eren:min>
+      <eren:max>1</eren:max>
+      <eren:title>Communications Chief</eren:title>
+      <eren:description>The Communications Chief coordinates the public outreach during the crisis and seeks to keep the public informed and aware of the actions of authorities. </eren:description>
+      <eren:briefing> The Communications Chief manages information according to proper policies and procedures for disaster situations. The Communication Officer:
+- Creates Strategic Messages
+- Performs Crisis Communications 
+- Conducts Outreach
+- Reports Progress
+- Quells Rumors</eren:briefing>
+    </eren:role>
+    <eren:role ID="Observer">
+	  <eren:image>/resources/images/NPCs/Reporter.png</eren:image>
+      <eren:min>0</eren:min>
+      <eren:max>10</eren:max>
+      <eren:title>Observer Participant</eren:title>
+      <eren:description>Another player in the system not represented by any of the in-game actions.</eren:description>
+      <eren:briefing>You get to watch all the action!</eren:briefing>
+    </eren:role>
+  </eren:roles>
+
+	<eren:events>
+		<eren:event ID="Event_01" xsi:type="AnthraxEventType">
+			<eren:description>Aerosolized Anthrax release in Norfolk, VA
+			</eren:description>
+			<eren:location>
+				<eren:line>
+					<kml:tessellate>1</kml:tessellate>
+					<kml:coordinates>-76.425616362551,36.78683987009428,0
+						-76.42385809200974,36.90085599224829,0
+						-76.40180834789931,36.94130686004286,0
+						-76.42648347824424,36.98591283205224,0
+						-76.37733922082605,37.03089886293282,0</kml:coordinates>
+				</eren:line>
+			</eren:location>
+			<eren:eventtime>
+			 <eren:starttime>12345</eren:starttime>
+			</eren:eventtime>
+		</eren:event>
+	</eren:events>
+
+	<eren:scenariolocation>
+		<eren:name>Norfolk County</eren:name>
+		<eren:state>VA</eren:state>
+		<eren:location>
+			<eren:kmlLocation>
+				<kml:longitude>-76.201867</kml:longitude>
+				<kml:latitude>36.91</kml:latitude>
+			</eren:kmlLocation>
+		</eren:location>
+		<eren:population>1795015</eren:population>
+	</eren:scenariolocation>
+  
+  <eren:facilities>
+
+    <eren:eoc ID="EOC_01" Name="Norfolk EOC">
+      <eren:status>IN_USE</eren:status>
+      <eren:location>
+        <eren:kmlLocation>
+          <kml:longitude>-76.385351</kml:longitude>
+          <kml:latitude>37.036984</kml:latitude>
+        </eren:kmlLocation>
+      </eren:location>
+    </eren:eoc>
+
+    <eren:pod ID="POD_01" Name="Hampton Coliseum">
+      <eren:status>AVAILABLE</eren:status>
+      <eren:location>
+        <eren:kmlLocation>
+          <kml:longitude>-76.385351</kml:longitude>
+          <kml:latitude>37.036984</kml:latitude>
+        </eren:kmlLocation>
+      </eren:location>
+      <eren:staff>
+        <eren:function>Medical</eren:function>
+        <eren:min>80</eren:min>
+        <eren:target>120</eren:target>
+        <eren:current>0</eren:current>
+      </eren:staff>
+      <eren:staff>
+        <eren:function>Security</eren:function>
+        <eren:min>20</eren:min>
+        <eren:target>50</eren:target>
+        <eren:current>0</eren:current>
+      </eren:staff>
+      <eren:staff>
+        <eren:function>Support</eren:function>
+        <eren:min>30</eren:min>
+        <eren:target>40</eren:target>
+        <eren:current>0</eren:current>
+      </eren:staff>
+      <eren:manager>OpsMgr_POD_01</eren:manager>
+      <eren:owner>Owner_POD_01</eren:owner>
+      <eren:localPopulation>1000</eren:localPopulation>
+      <eren:timetoopen>7200</eren:timetoopen>
+    </eren:pod>
+
+    <eren:pod ID="POD_02" Name="Harbor Park Stadium">
+      <eren:status>AVAILABLE</eren:status>
+      <eren:location>
+        <eren:kmlLocation>
+          <kml:longitude>-76.278873</kml:longitude>
+          <kml:latitude>36.842710</kml:latitude>
+        </eren:kmlLocation>
+      </eren:location>
+      <eren:staff>
+        <eren:function>Medical</eren:function>
+        <eren:min>80</eren:min>
+        <eren:target>120</eren:target>
+        <eren:current>0</eren:current>
+      </eren:staff>
+      <eren:staff>
+        <eren:function>Security</eren:function>
+        <eren:min>20</eren:min>
+        <eren:target>50</eren:target>
+        <eren:current>0</eren:current>
+      </eren:staff>
+      <eren:staff>
+        <eren:function>Support</eren:function>
+        <eren:min>30</eren:min>
+        <eren:target>40</eren:target>
+        <eren:current>0</eren:current>
+      </eren:staff>
+      <eren:manager>OpsMgr_POD_02</eren:manager>
+      <eren:owner>Owner_POD_02</eren:owner>
+      <eren:localPopulation>1000</eren:localPopulation>
+      <eren:timetoopen>7200</eren:timetoopen>
+    </eren:pod>
+
+    <eren:pod ID="POD_03" Name="Norfolk Naval Shipyard">
+      <eren:status>AVAILABLE</eren:status>
+      <eren:location>
+        <eren:kmlLocation>
+          <kml:longitude>-76.297222</kml:longitude>
+          <kml:latitude>36.815278</kml:latitude>
+        </eren:kmlLocation>
+      </eren:location>
+      <eren:staff>
+        <eren:function>Medical</eren:function>
+        <eren:min>80</eren:min>
+        <eren:target>120</eren:target>
+        <eren:current>0</eren:current>
+      </eren:staff>
+      <eren:staff>
+        <eren:function>Security</eren:function>
+        <eren:min>20</eren:min>
+        <eren:target>50</eren:target>
+        <eren:current>0</eren:current>
+      </eren:staff>
+      <eren:staff>
+        <eren:function>Support</eren:function>
+        <eren:min>30</eren:min>
+        <eren:target>40</eren:target>
+        <eren:current>0</eren:current>
+      </eren:staff>
+      <eren:manager>OpsMgr_POD_03</eren:manager>
+      <eren:owner>Owner_POD_03</eren:owner>
+      <eren:localPopulation>1000</eren:localPopulation>
+      <eren:timetoopen>7200</eren:timetoopen>
+    </eren:pod>
+
+    <eren:pod ID="POD_04" Name="Churchland Park">
+      <eren:status>AVAILABLE</eren:status>
+      <eren:location>
+        <eren:kmlLocation>
+          <kml:longitude>-76.370121</kml:longitude>
+          <kml:latitude>36.887287</kml:latitude>
+        </eren:kmlLocation>
+      </eren:location>
+      <eren:staff>
+        <eren:function>Medical</eren:function>
+        <eren:min>80</eren:min>
+        <eren:target>120</eren:target>
+        <eren:current>0</eren:current>
+      </eren:staff>
+      <eren:staff>
+        <eren:function>Security</eren:function>
+        <eren:min>20</eren:min>
+        <eren:target>50</eren:target>
+        <eren:current>0</eren:current>
+      </eren:staff>
+      <eren:staff>
+        <eren:function>Support</eren:function>
+        <eren:min>30</eren:min>
+        <eren:target>40</eren:target>
+        <eren:current>0</eren:current>
+      </eren:staff>
+      <eren:manager>OpsMgr_POD_04</eren:manager>
+      <eren:owner>Owner_POD_04</eren:owner>
+      <eren:localPopulation>1000</eren:localPopulation>
+      <eren:timetoopen>7200</eren:timetoopen>
+    </eren:pod>
+
+    <eren:pod ID="POD_05" Name="Oak Grove Lake park">
+      <eren:status>AVAILABLE</eren:status>
+      <eren:location>
+        <eren:kmlLocation>
+          <kml:longitude>-76.258050</kml:longitude>
+          <kml:latitude>36.751180</kml:latitude>
+        </eren:kmlLocation>
+      </eren:location>
+      <eren:staff>
+        <eren:function>Medical</eren:function>
+        <eren:min>80</eren:min>
+        <eren:target>120</eren:target>
+        <eren:current>0</eren:current>
+      </eren:staff>
+      <eren:staff>
+        <eren:function>Security</eren:function>
+        <eren:min>20</eren:min>
+        <eren:target>50</eren:target>
+        <eren:current>0</eren:current>
+      </eren:staff>
+      <eren:staff>
+        <eren:function>Support</eren:function>
+        <eren:min>30</eren:min>
+        <eren:target>40</eren:target>
+        <eren:current>0</eren:current>
+      </eren:staff>
+      <eren:manager>OpsMgr_POD_05</eren:manager>
+      <eren:owner>Owner_POD_05</eren:owner>
+      <eren:localPopulation>1000</eren:localPopulation>
+      <eren:timetoopen>7200</eren:timetoopen>
+    </eren:pod>
+
+    <eren:hospital ID="hospital_01" Name="Sentara Norfolk General Hospital">
+      <eren:status>IN_USE</eren:status>
+      <eren:location>
+        <eren:kmlLocation>
+          <kml:longitude>-76.302990</kml:longitude>
+          <kml:latitude>36.861527</kml:latitude>
+        </eren:kmlLocation>
+      </eren:location>
+      <eren:staff>
+        <eren:function>Medical</eren:function>
+        <eren:min>700</eren:min>
+        <eren:target>1200</eren:target>
+        <eren:current>500</eren:current>
+      </eren:staff>
+      <eren:staff>
+        <eren:function>Security</eren:function>
+        <eren:min>30</eren:min>
+        <eren:target>50</eren:target>
+        <eren:current>10</eren:current>
+      </eren:staff>
+      <eren:manager>HospitalMgr</eren:manager>
+      <eren:capacity>1000</eren:capacity>
+      <eren:filled>800</eren:filled>
+    </eren:hospital>
+
+    <eren:hospital ID="hospital_02" Name="Leigh Memorial Hospital">
+      <eren:status>IN_USE</eren:status>
+      <eren:location>
+        <eren:kmlLocation>
+          <kml:longitude>-76.190102</kml:longitude>
+          <kml:latitude>36.850843</kml:latitude>
+        </eren:kmlLocation>
+      </eren:location>
+      <eren:staff>
+        <eren:function>Medical</eren:function>
+        <eren:min>700</eren:min>
+        <eren:target>1200</eren:target>
+        <eren:current>500</eren:current>
+      </eren:staff>
+      <eren:staff>
+        <eren:function>Security</eren:function>
+        <eren:min>30</eren:min>
+        <eren:target>50</eren:target>
+        <eren:current>10</eren:current>
+      </eren:staff>
+      <eren:manager>HospitalMgr_02</eren:manager>
+      <eren:capacity>1000</eren:capacity>
+      <eren:filled>800</eren:filled>
+    </eren:hospital>
+    
+    <eren:airport ID="Airport_01" Name="Norfolk International Airport" code="ORF">
+      <eren:status>IN_USE</eren:status>
+      <eren:location>
+        <eren:kmlLocation>
+          <kml:longitude>-76.205764</kml:longitude>
+          <kml:latitude>36.898670</kml:latitude>
+        </eren:kmlLocation>
+      </eren:location>
+    </eren:airport>
+    
+    <eren:rss ID="RSS_01">
+      <eren:status>COMMITTED</eren:status>
+      <eren:location>
+        <eren:kmlLocation>
+          <kml:longitude>-76.205764</kml:longitude>
+          <kml:latitude>36.898670</kml:latitude>
+        </eren:kmlLocation>
+			</eren:location>
+		<eren:manager>OpsMgr_RSS_01</eren:manager>
+		</eren:rss>
+  </eren:facilities>
+
+  <eren:people>
+    <eren:staff ID="staff_01">
+      <eren:status>AVAILABLE</eren:status>
+      <eren:quantity>1000</eren:quantity>
+      <eren:function>Medical</eren:function>
+    </eren:staff>
+
+    <eren:staff ID="staff_02">
+      <eren:status>AVAILABLE</eren:status>
+      <eren:availability>0</eren:availability>
+      <eren:quantity>1000</eren:quantity>
+      <eren:function>Security</eren:function>
+    </eren:staff>
+
+    <eren:staff ID="staff_03">
+      <eren:status>AVAILABLE</eren:status>
+      <eren:availability>0</eren:availability>
+      <eren:quantity>800</eren:quantity>
+      <eren:function>Support</eren:function>
+    </eren:staff>
+
+    <eren:staff ID="staff_04">
+      <eren:status>AVAILABLE</eren:status>
+      <eren:availability>0</eren:availability>
+      <eren:quantity>100</eren:quantity>
+      <eren:function>Truck Driver</eren:function>
+    </eren:staff>
+
+    <eren:npc ID="DEOC_assistant">
+      <eren:firstname>Billy</eren:firstname>
+      <eren:lastname>Mowry</eren:lastname>
+      <eren:orgname>Norfolk EOC</eren:orgname>
+      <eren:npcRole>Assistant to the Director</eren:npcRole>
+      <eren:image>/resources/images/NPCs/DEOC_assistant.png</eren:image>
+      <eren:statechart>DEOC_assistant</eren:statechart>
+    </eren:npc>
+
+    <eren:npc ID="HamptonDEOC">
+      <eren:firstname>Teresa</eren:firstname>
+      <eren:lastname>Charley</eren:lastname>
+      <eren:orgname>Hampton EOC</eren:orgname>
+      <eren:npcRole>EOC Director</eren:npcRole>
+      <eren:image>/resources/images/NPCs/HamptonDEOC.png</eren:image>
+      <eren:statechart>HamptonDEOC</eren:statechart>
+    </eren:npc>
+
+    <eren:npc ID="JIC_assistant">
+      <eren:firstname>Roy</eren:firstname>
+      <eren:lastname>Blanding</eren:lastname>
+      <eren:orgname>Norfolk Joint Information Center</eren:orgname>
+      <eren:npcRole>Assistant to the Director of Communications</eren:npcRole>
+      <eren:image>/resources/images/NPCs/JIC_assistant.png</eren:image>
+      <eren:statechart>JIC_assistant</eren:statechart>
+    </eren:npc>
+
+    <eren:npc ID="NorfolkMayor">
+      <eren:firstname>Sherry</eren:firstname>
+      <eren:lastname>Haddad</eren:lastname>
+      <eren:orgname>City of Norfolk</eren:orgname>
+      <eren:npcRole>Mayor</eren:npcRole>
+      <eren:image>/resources/images/NPCs/NorfolkMayor.png</eren:image>
+      <eren:statechart>NorfolkMayor</eren:statechart>
+    </eren:npc>
+
+    <eren:npc ID="Ops_assistant">
+      <eren:firstname>Jonathan</eren:firstname>
+      <eren:lastname>Parmer</eren:lastname>
+      <eren:orgname>Norfolk EOC</eren:orgname>
+      <eren:npcRole>Assistant to the Director of Operations</eren:npcRole>
+      <eren:image>/resources/images/NPCs/Ops_assistant.png</eren:image>
+      <eren:statechart>Ops_assistant</eren:statechart>
+    </eren:npc>
+
+      <eren:npc ID="OpsMgr_RSS_01">
+        <eren:firstname>Jacob</eren:firstname>
+        <eren:lastname>Pauley</eren:lastname>
+        <eren:facility>RSS_01</eren:facility>
+        <eren:npcRole>Operations Manager</eren:npcRole>
+        <eren:image>/resources/images/NPCs/OpsMgr_RSS_01.png</eren:image>
+        <eren:statechart>RSS_OpsMgr</eren:statechart>
+      </eren:npc>
+
+      <eren:npc ID="OpsMgr_POD_01">
+        <eren:firstname>Josephine</eren:firstname>
+        <eren:lastname>Gwin</eren:lastname>
+        <eren:facility>POD_01</eren:facility>
+        <eren:npcRole>Operations Manager</eren:npcRole>
+        <eren:image>/resources/images/NPCs/OpsMgr_POD_01.png</eren:image>
+        <eren:statechart>POD_OpsMgr</eren:statechart>
+      </eren:npc>
+
+      <eren:npc ID="OpsMgr_POD_02">
+        <eren:firstname>Edna</eren:firstname>
+        <eren:lastname>Bolden</eren:lastname>
+        <eren:facility>POD_02</eren:facility>
+        <eren:npcRole>Operations Manager</eren:npcRole>
+        <eren:image>/resources/images/NPCs/OpsMgr_POD_02.png</eren:image>
+        <eren:statechart>POD_OpsMgr</eren:statechart>
+      </eren:npc>
+    
+      <eren:npc ID="OpsMgr_POD_03">
+        <eren:firstname>Kristen</eren:firstname>
+        <eren:lastname>Stultz</eren:lastname>
+        <eren:facility>POD_03</eren:facility>
+        <eren:npcRole>Operations Manager</eren:npcRole>
+        <eren:image>/resources/images/NPCs/OpsMgr_POD_03.png</eren:image>
+        <eren:statechart>POD_OpsMgr</eren:statechart>
+      </eren:npc>
+    
+      <eren:npc ID="OpsMgr_POD_04">
+        <eren:firstname>Todd</eren:firstname>
+        <eren:lastname>Western</eren:lastname>
+        <eren:facility>POD_04</eren:facility>
+        <eren:npcRole>Operations Manager</eren:npcRole>
+        <eren:image>/resources/images/NPCs/OpsMgr_POD_04.png</eren:image>
+        <eren:statechart>POD_OpsMgr</eren:statechart>
+      </eren:npc>
+    
+      <eren:npc ID="OpsMgr_POD_05">
+        <eren:firstname>Candace</eren:firstname>
+        <eren:lastname>Irving</eren:lastname>
+        <eren:facility>POD_05</eren:facility>
+        <eren:npcRole>Operations Manager</eren:npcRole>
+        <eren:image>/resources/images/NPCs/OpsMgr_POD_05.png</eren:image>
+        <eren:statechart>POD_OpsMgr</eren:statechart>
+      </eren:npc>
+
+      <eren:npc ID="Owner_POD_01">
+        <eren:firstname></eren:firstname>
+        <eren:lastname></eren:lastname>
+        <eren:facility>POD_01</eren:facility>
+        <eren:npcRole>Facility Owner</eren:npcRole>
+        <eren:image></eren:image>
+        <eren:statechart>POD_Owner</eren:statechart>
+      </eren:npc>
+
+      <eren:npc ID="Owner_POD_02">
+        <eren:firstname></eren:firstname>
+        <eren:lastname></eren:lastname>
+        <eren:facility>POD_02</eren:facility>
+        <eren:npcRole>Facility Owner</eren:npcRole>
+        <eren:image></eren:image>
+        <eren:statechart>POD_Owner</eren:statechart>
+      </eren:npc>
+
+      <eren:npc ID="Owner_POD_03">
+        <eren:firstname></eren:firstname>
+        <eren:lastname></eren:lastname>
+        <eren:facility>POD_03</eren:facility>
+        <eren:npcRole>Facility Owner</eren:npcRole>
+        <eren:image></eren:image>
+        <eren:statechart>POD_Owner</eren:statechart>
+      </eren:npc>
+
+      <eren:npc ID="Owner_POD_04">
+        <eren:firstname></eren:firstname>
+        <eren:lastname></eren:lastname>
+        <eren:facility>POD_04</eren:facility>
+        <eren:npcRole>Facility Owner</eren:npcRole>
+        <eren:image></eren:image>
+        <eren:statechart>POD_Owner</eren:statechart>
+      </eren:npc>
+
+      <eren:npc ID="Owner_POD_05">
+        <eren:firstname></eren:firstname>
+        <eren:lastname></eren:lastname>
+        <eren:facility>POD_05</eren:facility>
+        <eren:npcRole>Facility Owner</eren:npcRole>
+        <eren:image></eren:image>
+        <eren:statechart>POD_Owner</eren:statechart>
+      </eren:npc>
+	  
+      <eren:npc ID="HospitalMgr">
+        <eren:firstname>Peter</eren:firstname>
+        <eren:lastname>Eiland</eren:lastname>
+        <eren:facility>hospital_01</eren:facility>
+        <eren:npcRole>Manager</eren:npcRole>
+        <eren:image>/resources/images/NPCs/HospitalMgr.png</eren:image>
+        <eren:statechart>HospitalMgr</eren:statechart>
+      </eren:npc>
+	  
+      <eren:npc ID="HospitalMgr_02">
+        <eren:firstname>Sara</eren:firstname>
+        <eren:lastname>Ocampo</eren:lastname>
+        <eren:facility>hospital_02</eren:facility>
+        <eren:npcRole>Manager</eren:npcRole>
+        <eren:image>/resources/images/NPCs/HospitalMgr_02.png</eren:image>
+        <eren:statechart>HospitalMgr</eren:statechart>
+      </eren:npc>
+
+  </eren:people>
+
+  <eren:equipment>
+    <eren:podEquipment ID="equip_01">
+      <eren:status>AVAILABLE</eren:status>
+      <eren:location ref="EOC_O1"/>
+      <eren:quantity>10</eren:quantity>
+    </eren:podEquipment>
+
+    <eren:rssEquipment ID="equip_02">
+      <eren:status>COMMITTED</eren:status>
+      <eren:location ref="EOC_O1"/>
+      <eren:quantity>1</eren:quantity>
+    </eren:rssEquipment>
+
+    <eren:medication ID="drugs_01">
+      <eren:status>COMMITTED</eren:status>
+      <eren:location ref="Airport_O1"/>
+      <eren:quantity>10000</eren:quantity>
+    </eren:medication>
+
+  </eren:equipment>
+
+</eren:scenario>

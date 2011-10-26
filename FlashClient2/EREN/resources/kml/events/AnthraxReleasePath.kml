@@ -1,0 +1,30 @@
+<kml xmlns='http://earth.google.com/kml/2.2'
+xmlns:gx='http://www.google.com/kml/ext/2.2' xmlns:atom='http://
+www.w3.org/2005/Atom'>
+<Document>
+	<name>AntrhaxReleasePath.kml</name>
+	<Style id="sh_ylw-pushpin">
+		<IconStyle>
+			<scale>1.3</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+		<LineStyle>
+			<color>ff0000ff</color>
+			<width>5</width>
+		</LineStyle>
+	</Style>
+	<Placemark>
+		<name>Anthrax Release Path</name>
+		<styleUrl>#sh_ylw-pushpin</styleUrl>
+		<LineString>
+			<tessellate>1</tessellate>
+			<coordinates>
+				-76.425616362551,36.78683987009428,0 -76.42385809200974,36.90085599224829,0 -76.40180834789931,36.94130686004286,0 -76.42648347824424,36.98591283205224,0 -76.37733922082605,37.03089886293282,0 
+			</coordinates>
+		</LineString>
+	</Placemark>
+</Document>
+</kml>

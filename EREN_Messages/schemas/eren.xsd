@@ -1,0 +1,290 @@
+<schema targetNamespace="urn:mitre:eren:1.0"
+  elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
+  xmlns:kml="http://earth.google.com/kml/2.1" 
+  xmlns:eren="urn:mitre:eren:1.0">
+
+  <import namespace="http://earth.google.com/kml/2.1"
+    schemaLocation="http://code.google.com/apis/kml/schema/kml21.xsd" />
+
+
+
+  <element name="EREN-scenario">
+    <complexType>
+      <sequence>
+        <element name="Event" type="eren:EventType" minOccurs="1"
+          maxOccurs="unbounded" />
+        <element name="County" type="eren:CountyType" minOccurs="1"
+          maxOccurs="1" />
+        <element name="Facilities">
+          <complexType>
+            <sequence>
+              <element name="EOC" type="eren:EOCType" minOccurs="1" maxOccurs="1"/>
+              <element name="POD" type="eren:PODType" minOccurs="0" maxOccurs="unbounded"/>
+              <element name="Hospital" type="eren:HospitalType" minOccurs="0" maxOccurs="unbounded"/>
+              <element name="Airport" type="eren:AirportType" minOccurs="0" maxOccurs="unbounded"/>
+              <element name="RSS" type="eren:RSSType" minOccurs="0" maxOccurs="unbounded"/>
+            </sequence>
+          </complexType>
+        </element>
+        <element name="Vehicles">
+          <complexType>
+            <sequence>
+              <element name="PoliceCar" type="eren:PoliceCarType" minOccurs="0" maxOccurs="unbounded"/>
+              <element name="Ambulance" type="eren:AmbulanceType" minOccurs="0" maxOccurs="unbounded"/>
+              <element name="FireTruck" type="eren:FireTruckType" minOccurs="0" maxOccurs="unbounded"/>
+              <element name="Truck" type="eren:TruckType" minOccurs="0" maxOccurs="unbounded"/>
+            </sequence>
+          </complexType>
+        </element>
+        <element name="Staff">
+          <complexType>
+            <sequence>
+              <element name="MedicalStaff" type="eren:StaffType" minOccurs="0" maxOccurs="unbounded"/>
+              <element name="SecurityStaff" type="eren:StaffType" minOccurs="0" maxOccurs="unbounded"/>
+              <element name="SupportStaff" type="eren:StaffType" minOccurs="0" maxOccurs="unbounded"/>
+              <element name="TruckDriverStaff" type="eren:StaffType" minOccurs="0" maxOccurs="unbounded"/>
+              <element name="NationalGuard" type="eren:StaffType" minOccurs="0" maxOccurs="unbounded"/>
+            </sequence>
+          </complexType>
+        </element>
+        <element name="Equipment">
+          <complexType>
+            <sequence>
+              <element name="PODEquipment" type="eren:PODEquipmentType" minOccurs="0" maxOccurs="unbounded"/>
+              <element name="Medication" type="eren:MedicationType" minOccurs="0" maxOccurs="unbounded"/>
+            </sequence>
+          </complexType>
+        </element>
+      </sequence>
+    </complexType>
+  </element>
+  
+  <complexType name="CountyType">
+    <sequence>
+      <element name="Name" type="string"/>
+      <element name="State" type="string"/>
+      <element name="Location" type="eren:LocationType"/>
+      <element name="Population" type="integer"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="ResourceType">
+    <sequence>
+      <element name="Status" type="eren:StatusType" minOccurs="1"
+        maxOccurs="1" />
+      <element name="Availability" type="eren:AvailabilityType"
+        minOccurs="1" maxOccurs="1" />
+      <element name="Location" type="eren:LocationType" minOccurs="0"
+        maxOccurs="1" />
+      <element name="Quantity" type="integer" minOccurs="0" maxOccurs="1"/>
+    </sequence>
+    <attribute name="ID" type="string" use="required"/>
+    <attribute name="OwnerID" type="string" use="optional"/>
+    <attribute name="Name" type="string" use="optional"/>
+  </complexType>
+  
+  <simpleType name="StatusType">
+    <restriction base="string"/>
+  </simpleType>
+  
+  <simpleType name="AvailabilityType">
+    <restriction base="eren:TimestampType"/>
+  </simpleType>
+  
+  <simpleType name="TimestampType">
+    <restriction base="integer"/>
+  </simpleType>
+
+  <complexType name="FacilityType">
+    <complexContent>
+      <extension base="eren:ResourceType">
+        <sequence>
+          <element name="Staff" type="eren:FacilityStaffType" minOccurs="0"
+            maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <complexType name="PODType">
+    <complexContent>
+      <extension base="eren:FacilityType">
+        <sequence>
+          <element name="LocalPopulation" type="integer" minOccurs="1" maxOccurs="1" />
+          <element name="Throughput" minOccurs="1"
+            maxOccurs="1">
+            <annotation>
+              <documentation>
+                Number of people that can be processed
+                per hour 
+              </documentation>
+            </annotation>
+          </element>
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <complexType name="RSSType">
+    <complexContent>
+      <extension base="eren:FacilityType"></extension>
+    </complexContent>
+  </complexType>
+  
+  <complexType name="HospitalType">
+    <complexContent>
+      <extension base="eren:FacilityType">
+        <sequence>
+          <element name="Capacity" type="integer" minOccurs="1" maxOccurs="1"/>
+          <element name="Filled" type="integer" minOccurs="1" maxOccurs="1"/>
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  
+  <complexType name="EOCType">
+    <complexContent>
+      <extension base="eren:FacilityType">
+        
+      </extension>
+    </complexContent>
+  </complexType>
+  
+  <complexType name="AirportType">
+    <complexContent>
+      <extension base="eren:FacilityType">
+        <attribute name="code" type="string" use="required"/>
+      </extension>
+    </complexContent>
+  </complexType>
+
+
+  <complexType name="EventType">
+    <all>
+      <element name="Description" type="string"></element>
+      <element name="Location" type="eren:LocationType"></element>
+      <element name="Time" type="double"></element>
+    </all>
+    <attribute name="ID" type="string" use="required"/>
+  </complexType>
+  
+  <complexType name="LocationType">
+    <choice>
+      <element name="kmlLocation" type="kml:LocationType" minOccurs="0" maxOccurs="1"/>
+      <element name="point" type="kml:PointType" minOccurs="0" maxOccurs="1"/>
+      <element name="line" type="kml:LineStringType" minOccurs="0" maxOccurs="1"/>
+      <element name="facility" type="eren:FacilityRefType" minOccurs="0" maxOccurs="1"/>
+    </choice>
+  </complexType>
+  
+  <simpleType name="FacilityRefType">
+    <restriction base="string"/>
+  </simpleType>
+
+  <complexType name="AnthraxEventType">
+    <complexContent>
+      <extension base="eren:EventType"></extension>
+    </complexContent>
+  </complexType>
+
+
+  <complexType name="FireEventType">
+    <complexContent>
+      <extension base="eren:EventType"></extension>
+    </complexContent>
+  </complexType>
+
+  <complexType name="StaffType">
+    <complexContent>
+      <extension base="eren:ResourceType">
+        <sequence>
+          <element name="Function" type="eren:StaffFunctionType"/>
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  
+  <complexType name="EquipmentType">
+    <complexContent>
+      <extension base="eren:ResourceType"/>
+    </complexContent>
+  </complexType>
+  
+  
+  <complexType name="PODEquipmentType">
+    <complexContent>
+      <extension base="eren:EquipmentType"/>
+    </complexContent>
+  </complexType>
+  
+  <complexType name="MedicationType">
+    <complexContent>
+      <extension base="eren:EquipmentType"/>
+    </complexContent>
+  </complexType>
+
+  <complexType name="VehicleType">
+    <complexContent>
+      <extension base="eren:ResourceType"/>
+    </complexContent>
+  </complexType>
+
+  <complexType name="TruckType">
+    <complexContent>
+      <extension base="eren:VehicleType">
+        <sequence>
+          <element name="Capacity" type="float"/>
+          <element name="CapacityUnits" type="string" default="cu_ft"/>
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <complexType name="AmbulanceType">
+    <complexContent>
+      <extension base="eren:VehicleType"/>
+    </complexContent>
+  </complexType>
+
+  <complexType name="PoliceCarType">
+    <complexContent>
+      <extension base="eren:VehicleType"/>
+    </complexContent>
+  </complexType>
+  
+  <complexType name="FireTruckType">
+    <complexContent>
+      <extension base="eren:VehicleType"/>
+    </complexContent>
+  </complexType>
+  
+  <complexType name="PersonType">
+    <sequence>
+      <element name="Location" type="eren:LocationType" />
+      <element name="Role" type="string" />
+      <element name="InStaff" type="string" />
+    </sequence>
+    <attribute name="ID" type="string" use="required"/>
+    <attribute name="Name" type="string" use="required"/>
+  </complexType>
+
+  <complexType name="FacilityStaffType">
+    <sequence>
+      <element name="Function" type="string"/>
+      <element name="Min" type="int"/>
+      <element name="Max" type="int"/>
+      <element name="Current" type="int"/>
+    </sequence>
+  </complexType>
+
+  <simpleType name="StaffFunctionType">
+    <restriction base="string">
+      <enumeration value="Medical"/>
+      <enumeration value="Security"/>
+      <enumeration value="Support"/>
+      <enumeration value="National Guard"/>
+      <enumeration value="Truck Driver"/>
+    </restriction>
+  </simpleType>
+
+</schema>

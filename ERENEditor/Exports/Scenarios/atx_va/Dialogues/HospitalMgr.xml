@@ -1,0 +1,412 @@
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0"
+	xmlns:cs="http://commons.apache.org/scxml" xmlns:cst="urn:mitre:eren:dlg:custom:1.0"
+	xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:eren="urn:mitre:eren:1.0"
+	xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+	xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg" xmlns:xi="http://www.w3.org/2001/XInclude"
+	id="HospitalMgr" initialstate="HospitalMgr:dialogue">
+
+	<state id="HospitalMgr:dialogue" initial="HospitalMgr:waitForStart">
+		<onentry>
+			<log label="HospitalMgr" expr="hospitalID" />
+			<cs:var name="precedingUserMsg" expr="''" />
+			<cs:var name="precedingRsrcMsg" expr="''" />
+			<cs:var name="originatingRsrcMsg" expr="''" />
+		</onentry>
+
+		<state id="HospitalMgr:waitForStart">
+			<transition event="patients.arrive" cond="_eventdata eq hospitalID"
+				target="HospitalMgr:anthraxDetected">
+				<log label="checking transition in hospital mgr" expr="_eventdata + ', ' + hospitalID" />
+			</transition>
+		</state>
+
+		<state id="HospitalMgr:anthraxDetected">
+			<onentry>
+				<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+				<cs:var name="addressee" expr="'EOCdir'" />
+				<cs:var name="messageType" expr="'inform'" />
+				<cs:var name="messageSummary" expr="'Anthrax detected!'" />
+				<cs:var name="messageText"
+					expr="'We have eight patients at the hospital here who appear to have symptoms of Anthrax. Would you like any more information?'" />
+				<cs:var name="messageLocation" expr="hospitalID" />
+				<cs:var name="numResponses" expr="2" />
+				<cs:var name="responseID0" expr="messageID+':0'" />
+				<cs:var name="responseFollowup0" expr="true" />
+				<cs:var name="shortResponse0" expr="'Request more information'" />
+				<cs:var name="longResponse0"
+					expr="'Yes, I would like more information. What can you tell me about these patients?'" />
+				<cs:var name="responseID1" expr="messageID+':1'" />
+				<cs:var name="shortResponse1" expr="'No thanks'" />
+				<cs:var name="longResponse1"
+					expr="'No thanks, I will get in touch if I need more information.'" />
+				<cst:sendUserMessage />
+			</onentry>
+			<onexit>
+				<assign name="precedingUserMsg" expr="messageID" />
+			</onexit>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+				target="HospitalMgr:moreInfo">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+				target="HospitalMgr:noInfoNeeded">
+			</transition>
+		</state>
+
+
+
+		<state id="HospitalMgr:moreInfo">
+			<onentry>
+				<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+				<cs:var name="addressee" expr="'EOCdir'" />
+				<cs:var name="messageType" expr="'inform'" />
+				<cs:var name="messageSummary" expr="'Patient information available'" />
+				<cs:var name="messageText"
+					expr="'I have the names, genders, ages, and daytime and nighttime zip codes of all of our anthrax patients.'" />
+				<cs:var name="numResponses" expr="5" />
+				<cs:var name="responseID0" expr="messageID+':0'" />
+				<cs:var name="responseFollowup0" expr="true" />
+				<cs:var name="shortResponse0" expr="'Request names'" />
+				<cs:var name="longResponse0" expr="'Can you give me the names?'" />
+				<cs:var name="responseID1" expr="messageID+':1'" />
+				<cs:var name="responseFollowup1" expr="true" />
+				<cs:var name="shortResponse1" expr="'Request genders'" />
+				<cs:var name="longResponse1" expr="'Can you give me the genders?'" />
+				<cs:var name="responseID2" expr="messageID+':2'" />
+				<cs:var name="responseFollowup2" expr="true" />
+				<cs:var name="shortResponse2" expr="'Request ages'" />
+				<cs:var name="longResponse2" expr="'Can you give me the ages?'" />
+				<cs:var name="responseID3" expr="messageID+':3'" />
+				<cs:var name="responseFollowup3" expr="true" />
+				<cs:var name="shortResponse3" expr="'Request daytime zip codes'" />
+				<cs:var name="longResponse3" expr="'Can you give me the daytime zip codes?'" />
+				<cs:var name="responseID4" expr="messageID+':4'" />
+				<cs:var name="responseFollowup4" expr="true" />
+				<cs:var name="shortResponse4" expr="'Request nighttime zip codes'" />
+				<cs:var name="longResponse4" expr="'Can you give me the nighttime zip codes?'" />
+				<cst:sendUserMessage />
+			</onentry>
+			<onexit>
+				<assign name="precedingUserMsg" expr="messageID" />
+			</onexit>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+				target="HospitalMgr:names">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+				target="HospitalMgr:genders">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+				target="HospitalMgr:ages">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID3"
+				target="HospitalMgr:daytimeZips">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID4"
+				target="HospitalMgr:nighttimeZips">
+			</transition>
+		</state>
+
+		<state id="HospitalMgr:names">
+			<onentry>
+				<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+				<cs:var name="addressee" expr="'EOCdir'" />
+				<cs:var name="messageType" expr="'inform'" />
+				<cs:var name="messageSummary" expr="'Patient names'" />
+				<cs:var name="messageText"
+					expr="'The patients'+dm.getApostrophe()+' names are a, b, c, d, e, f, g, h. Would you like any more information?'" />
+				<cs:var name="numResponses" expr="5" />
+				<cs:var name="responseID0" expr="messageID+':0'" />
+				<cs:var name="responseFollowup0" expr="true" />
+				<cs:var name="shortResponse0" expr="'Request genders'" />
+				<cs:var name="longResponse0" expr="'Can you give me the genders?'" />
+				<cs:var name="responseID1" expr="messageID+':1'" />
+				<cs:var name="responseFollowup1" expr="true" />
+				<cs:var name="shortResponse1" expr="'Request ages'" />
+				<cs:var name="longResponse1" expr="'Can you give me the ages?'" />
+				<cs:var name="responseID2" expr="messageID+':2'" />
+				<cs:var name="responseFollowup2" expr="true" />
+				<cs:var name="shortResponse2" expr="'Request daytime zip codes'" />
+				<cs:var name="longResponse2" expr="'Can you give me the daytime zip codes?'" />
+				<cs:var name="responseID3" expr="messageID+':3'" />
+				<cs:var name="responseFollowup3" expr="true" />
+				<cs:var name="shortResponse3" expr="'Request nighttime zip codes'" />
+				<cs:var name="longResponse3" expr="'Can you give me the nighttime zip codes?'" />
+				<cs:var name="responseID4" expr="messageID+':4'" />
+				<cs:var name="shortResponse4" expr="'All done'" />
+				<cs:var name="longResponse4" expr="'No thanks, I am all set for now.'" />
+				<cst:sendUserMessage />
+			</onentry>
+
+			<onexit>
+				<assign name="precedingUserMsg" expr="messageID" />
+			</onexit>
+
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+				target="HospitalMgr:genders">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+				target="HospitalMgr:ages">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+				target="HospitalMgr:daytimeZips">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID3"
+				target="HospitalMgr:nighttimeZips">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID4"
+				target="HospitalMgr:noInfoNeeded">
+			</transition>
+		</state>
+
+		<state id="HospitalMgr:genders">
+			<onentry>
+				<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+				<cs:var name="addressee" expr="'EOCdir'" />
+				<cs:var name="messageType" expr="'inform'" />
+				<cs:var name="messageSummary" expr="'Patient genders'" />
+				<cs:var name="messageText"
+					expr="'There are five women and three men. Would you like any more information?'" />
+				<cs:var name="numResponses" expr="5" />
+				<cs:var name="responseID0" expr="messageID+':0'" />
+				<cs:var name="responseFollowup0" expr="true" />
+				<cs:var name="shortResponse0" expr="'Request names'" />
+				<cs:var name="longResponse0" expr="'Can you give me the names?'" />
+				<cs:var name="responseID1" expr="messageID+':1'" />
+				<cs:var name="responseFollowup1" expr="true" />
+				<cs:var name="shortResponse1" expr="'Request ages'" />
+				<cs:var name="longResponse1" expr="'Can you give me the ages?'" />
+				<cs:var name="responseID3" expr="messageID+':2'" />
+				<cs:var name="responseFollowup2" expr="true" />
+				<cs:var name="shortResponse2" expr="'Request daytime zip codes'" />
+				<cs:var name="longResponse2" expr="'Can you give me the daytime zip codes?'" />
+				<cs:var name="responseID3" expr="messageID+':3'" />
+				<cs:var name="responseFollowup3" expr="true" />
+				<cs:var name="shortResponse3" expr="'Request nighttime zip codes'" />
+				<cs:var name="longResponse3" expr="'Can you give me the nighttime zip codes?'" />
+				<cs:var name="responseID4" expr="messageID+':4'" />
+				<cs:var name="shortResponse4" expr="'All done'" />
+				<cs:var name="longResponse4" expr="'No thanks, I am all set for now.'" />
+				<cst:sendUserMessage />
+			</onentry>
+			<onexit>
+				<cs:var name="precedingUserMsg" expr="messageID" />
+			</onexit>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+				target="HospitalMgr:names">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+				target="HospitalMgr:ages">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+				target="HospitalMgr:daytimeZips">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID3"
+				target="HospitalMgr:nighttimeZips">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID4"
+				target="HospitalMgr:noInfoNeeded">
+			</transition>
+		</state>
+
+		<state id="HospitalMgr:ages">
+			<onentry>
+				<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+				<cs:var name="addressee" expr="'EOCdir'" />
+				<cs:var name="messageType" expr="'inform'" />
+				<cs:var name="messageSummary" expr="'Patient ages'" />
+				<cs:var name="messageText"
+					expr="'The ages are 13, 24, 42, 45, 57, 58, 62 and 81. Would you like any more information?'" />
+				<cs:var name="numResponses" expr="5" />
+				<cs:var name="responseID0" expr="messageID+':0'" />
+				<cs:var name="responseFollowup0" expr="true" />
+				<cs:var name="shortResponse0" expr="'Request names'" />
+				<cs:var name="longResponse0" expr="'Can you give me the names?'" />
+				<cs:var name="responseID1" expr="messageID+':1'" />
+				<cs:var name="responseFollowup1" expr="true" />
+				<cs:var name="shortResponse1" expr="'Request genders'" />
+				<cs:var name="longResponse1" expr="'Can you give me the genders?'" />
+				<cs:var name="responseID2" expr="messageID+':2'" />
+				<cs:var name="responseFollowup2" expr="true" />
+				<cs:var name="shortResponse2" expr="'Request daytime zip codes'" />
+				<cs:var name="longResponse2" expr="'Can you give me the daytime zip codes?'" />
+				<cs:var name="responseID3" expr="messageID+':3'" />
+				<cs:var name="responseFollowup3" expr="true" />
+				<cs:var name="shortResponse3" expr="'Request nighttime zip codes'" />
+				<cs:var name="longResponse3" expr="'Can you give me the nighttime zip codes?'" />
+				<cs:var name="responseID4" expr="messageID+':4'" />
+				<cs:var name="shortResponse4" expr="'All done'" />
+				<cs:var name="longResponse4" expr="'No thanks, I am all set for now.'" />
+				<cst:sendUserMessage />
+			</onentry>
+			<onexit>
+				<assign name="precedingUserMsg" expr="messageID" />
+			</onexit>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+				target="HospitalMgr:names">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+				target="HospitalMgr:genders">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+				target="HospitalMgr:daytimeZips">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID3"
+				target="HospitalMgr:nighttimeZips">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID4"
+				target="HospitalMgr:noInfoNeeded">
+			</transition>
+		</state>
+
+		<state id="HospitalMgr:daytimeZips">
+			<onentry>
+				<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+				<cs:var name="addressee" expr="'EOCdir'" />
+				<cs:var name="messageType" expr="'inform'" />
+				<cs:var name="messageSummary" expr="'Daytime zip codes'" />
+				<cs:var name="messageText"
+					expr="'The daytime zip codes are: four in 23607 and one each in 23661, 23669, 23435 and 23321. Would you like any more information?'" />
+				<cs:var name="numLayers" expr="1" />
+				<cs:var name="kmlLabel0" expr="'daytime zips'" />
+				<cs:var name="kmlLayer0"
+					expr="'zipcode23607,zipcode23661,zipcode23669,zipcode23435,zipcode23321'" />
+				<cs:var name="numResponses" expr="5" />
+				<cs:var name="responseID0" expr="messageID+':0'" />
+				<cs:var name="responseFollowup0" expr="true" />
+				<cs:var name="shortResponse0" expr="'Request names'" />
+				<cs:var name="longResponse0" expr="'Can you give me the names?'" />
+				<cs:var name="responseID1" expr="messageID+':1'" />
+				<cs:var name="responseFollowup1" expr="true" />
+				<cs:var name="shortResponse1" expr="'Request genders'" />
+				<cs:var name="longResponse1" expr="'Can you give me the genders?'" />
+				<cs:var name="responseID2" expr="messageID+':2'" />
+				<cs:var name="responseFollowup2" expr="true" />
+				<cs:var name="shortResponse2" expr="'Request ages'" />
+				<cs:var name="longResponse2" expr="'Can you give me the ages?'" />
+				<cs:var name="responseID3" expr="messageID+':3'" />
+				<cs:var name="responseFollowup3" expr="true" />
+				<cs:var name="shortResponse3" expr="'Request nighttime zip codes'" />
+				<cs:var name="longResponse3" expr="'Can you give me the nighttime zip codes?'" />
+				<cs:var name="responseID4" expr="messageID+':4'" />
+				<cs:var name="shortResponse4" expr="'All done'" />
+				<cs:var name="longResponse4" expr="'No thanks, I am all set for now.'" />
+				<cst:sendUserMessage />
+			</onentry>
+			<onexit>
+				<assign name="precedingUserMsg" expr="messageID" />
+			</onexit>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+				target="HospitalMgr:names">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+				target="HospitalMgr:genders">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+				target="HospitalMgr:ages">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID3"
+				target="HospitalMgr:nighttimeZips">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID4"
+				target="HospitalMgr:noInfoNeeded">
+			</transition>
+		</state>
+
+		<state id="HospitalMgr:nighttimeZips">
+			<onentry>
+				<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+				<cs:var name="addressee" expr="'EOCdir'" />
+				<cs:var name="messageType" expr="'inform'" />
+				<cs:var name="messageSummary" expr="'Nighttime zip codes'" />
+				<cs:var name="messageText"
+					expr="'The nighttime zip codes are: three in 23666, two in 23669, and one each in 23601, 23435 and 23321. Would you like any more information?'" />
+				<cs:var name="numLayers" expr="1" />
+				<cs:var name="kmlLabel0" expr="'nighttime zips'" />
+				<cs:var name="kmlLayer0"
+					expr="'zipcode23666,zipcode23669,zipcode23601,zipcode23435,zipcode23321'" />
+				<cs:var name="numResponses" expr="5" />
+				<cs:var name="responseID0" expr="messageID+':0'" />
+				<cs:var name="responseFollowup0" expr="true" />
+				<cs:var name="shortResponse0" expr="'Request names'" />
+				<cs:var name="longResponse0" expr="'Can you give me the names?'" />
+				<cs:var name="responseID1" expr="messageID+':1'" />
+				<cs:var name="responseFollowup1" expr="true" />
+				<cs:var name="shortResponse1" expr="'Request genders'" />
+				<cs:var name="longResponse1" expr="'Can you give me the genders?'" />
+				<cs:var name="responseID2" expr="messageID+':2'" />
+				<cs:var name="responseFollowup2" expr="true" />
+				<cs:var name="shortResponse2" expr="'Request ages'" />
+				<cs:var name="longResponse2" expr="'Can you give me the ages?'" />
+				<cs:var name="responseID3" expr="messageID+':3'" />
+				<cs:var name="responseFollowup3" expr="true" />
+				<cs:var name="shortResponse3" expr="'Request daytime zip codes'" />
+				<cs:var name="longResponse3" expr="'Can you give me the daytime zip codes?'" />
+				<cs:var name="responseID4" expr="messageID+':4'" />
+				<cs:var name="shortResponse4" expr="'All done'" />
+				<cs:var name="longResponse4" expr="'No thanks, I am all set for now.'" />
+				<cst:sendUserMessage />
+			</onentry>
+			<onexit>
+				<assign name="precedingUserMsg" expr="messageID" />
+			</onexit>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+				target="HospitalMgr:names">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+				target="HospitalMgr:genders">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+				target="HospitalMgr:ages">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID3"
+				target="HospitalMgr:daytimeZips">
+			</transition>
+			<transition event="user.input"
+				cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID4"
+				target="HospitalMgr:noInfoNeeded">
+			</transition>
+		</state>
+
+		<state id="HospitalMgr:noInfoNeeded">
+			<onentry>
+				<send event="'anthrax.notified'" target="'DEOC_assistant'"
+					targettype="'dm'" />
+			</onentry>
+			<transition target="HospitalMgr:idle" />
+		</state>
+
+
+		<state id="HospitalMgr:idle">
+		</state>
+	</state>
+</scxml>

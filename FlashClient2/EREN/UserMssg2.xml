@@ -1,0 +1,54 @@
+<dlg:userMessage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+    xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:msg="urn:mitre:eren:dlg:1.0:msg" 
+	xmlns:eren="urn:mitre:eren:1.0"	xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3">
+	<dlg:sender xpil:ID="Owner:POD_03" dlg:photoURL="http://erenbus.mitre.org/FlashClient2/FlashClient2/EREN/resources/images/NPCs/VAEmergencyMgmt.png">
+	  <xpil:PartyName>
+        <xnl:PersonName>
+          <xnl:NameElement xnl:ElementType="FirstName">Rodney</xnl:NameElement>
+          <xnl:NameElement xnl:ElementType="LastName">Mackey</xnl:NameElement>
+        </xnl:PersonName>
+      </xpil:PartyName>
+      <xpil:Occupations>
+        <xpil:Occupation>
+          <xpil:OccupationElement xpil:Type="Role">Director of Virginia Emergency Management</xpil:OccupationElement>
+          <xpil:Employer>
+            <xnl:NameElement>State of Virginia</xnl:NameElement>
+          </xpil:Employer>
+        </xpil:Occupation> 
+      </xpil:Occupations>
+	</dlg:sender>
+	<dlg:messageID>Owner:P0D03:3</dlg:messageID>
+	<dlg:precedingMessageID></dlg:precedingMessageID>
+	<dlg:priority>0</dlg:priority>
+	<dlg:messageType>question</dlg:messageType>
+	<dlg:summary>Open POD</dlg:summary>
+	<dlg:messageText>Which POD location would you like to open first?</dlg:messageText>
+	<dlg:location>
+		<eren:facility>EOC_01</eren:facility>
+	</dlg:location>
+	<dlg:responseOption dlg:followup="false">
+	  <dlg:responseID>1</dlg:responseID>
+		<dlg:shortResponse>Hampton Colliseum</dlg:shortResponse>
+		<dlg:longResponse>Open the Hampton Colliseum POD first.</dlg:longResponse>
+	</dlg:responseOption>
+	<dlg:responseOption dlg:followup="false">
+	  <dlg:responseID>2</dlg:responseID>
+		<dlg:shortResponse>Harbor Park Stadium</dlg:shortResponse>
+		<dlg:longResponse>Open the Harbor Park Stadium POD first.</dlg:longResponse>
+	</dlg:responseOption>
+	<dlg:responseOption dlg:followup="false">
+	  <dlg:responseID>3</dlg:responseID>
+		<dlg:shortResponse>Norfolk Naval Shipyard</dlg:shortResponse>
+		<dlg:longResponse>Open the Norfolk Naval Shipyard POD first.</dlg:longResponse>
+	</dlg:responseOption>
+	<dlg:responseOption dlg:followup="false">
+	  <dlg:responseID>4</dlg:responseID>
+		<dlg:shortResponse>Churchland Park</dlg:shortResponse>
+		<dlg:longResponse>Open the Churchland Park POD first.</dlg:longResponse>
+	</dlg:responseOption>
+	<dlg:responseOption dlg:followup="false">
+	  <dlg:responseID>5</dlg:responseID>
+		<dlg:shortResponse>Oak Grove Lake Park</dlg:shortResponse>
+		<dlg:longResponse>Open the Oak Grove Lake Park POD first.</dlg:longResponse>
+	</dlg:responseOption>
+</dlg:userMessage>

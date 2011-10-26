@@ -1,0 +1,42 @@
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0"
+	xmlns:cs="http://commons.apache.org/scxml" xmlns:cst="urn:mitre:eren:dlg:custom:1.0"
+	xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:eren="urn:mitre:eren:1.0"
+	xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+	xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg" xmlns:xi="http://www.w3.org/2001/XInclude"
+	id="POD_Owner" initialstate="POD_Owner:waitForRequest">
+
+	<state id="POD_Owner:waitForRequest">
+		<onentry>
+			<cs:var name="msgSrcPrefix" expr="'Owner:'" />
+			<cs:var name="precedingMsg" expr="''" />
+			<cs:var name="originatingMsg" expr="''" />
+		</onentry>
+		<transition event="requisition.resource" cond="_eventdata.hasResourceType('POD') and _eventdata.hasResourceId(podID)"
+			target="POD_Owner:commitPOD">
+			<assign name="precedingMsg" expr="_eventdata.getMessageID()" />
+			<assign name="originatingMsg" expr="_eventdata.getOriginatingMessageID()" />
+		</transition>
+	</state>
+
+	<state id="POD_Owner:commitPOD">
+		<onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+			xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+			xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+			xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+			<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+			<cs:var name="messageType" expr="'commit.resource'" />
+			<cs:var name="resourceID" expr="podID" />
+			<cs:var name="resourceName" expr="dm.getPodName(podID)" />
+			<cs:var name="resourceTypeValue" expr="'POD'" />
+			<cs:var name="scheduleType" expr="'Committed'" />
+			<cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+			<cs:var name="latitude" expr="dm.getPodLat(podID)" />
+			<cs:var name="longitude" expr="dm.getPodLon(podID)" />
+			<cst:sendResourceMessage />
+		</onentry>
+		<transition target="POD_Owner:idle" />
+	</state>
+
+	<state id="POD_Owner:idle" final="true"></state>
+
+</scxml>

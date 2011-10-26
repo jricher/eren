@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+  xmlns:eren="urn:mitre:eren:1.0"
+  xmlns:dlg="urn:mitre:eren:dlg:1.0"
+  xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3"
+    xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+	targetNamespace="urn:mitre:eren:dlg:1.0" elementFormDefault="qualified"
+	attributeFormDefault="qualified">
+	<xsd:import namespace="urn:mitre:eren:1.0" schemaLocation="eren.xsd"/>
+  <xsd:import namespace="urn:oasis:names:tc:ciq:xpil:3" schemaLocation="../EDXL/xPIL.xsd"/>
+    <xsd:import namespace="urn:oasis:names:tc:ciq:xnl:3" schemaLocation="../EDXL/xNL.xsd"/>
+	<xsd:element name="userMessage">
+		<xsd:complexType>
+			<xsd:sequence>
+			  <xsd:element name="sender" type="xpil:PartyType" minOccurs="0" maxOccurs="1"/>
+			  <xsd:element name="messageID" type="xsd:string" minOccurs="1" maxOccurs="1" />
+			  <xsd:element name="precedingMessageID" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+        <xsd:element name="priority" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        <xsd:element name="timeout" type="xsd:integer" minOccurs="0" maxOccurs="1" />
+        <xsd:element name="messageType" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        <xsd:element name="summary" type="xsd:string" minOccurs="0" maxOccurs="1" />
+			  <xsd:element name="messageText" type="xsd:string" minOccurs="1" maxOccurs="1" />
+				<xsd:element name="location" type="eren:LocationType" minOccurs="0" maxOccurs="1" />
+        <xsd:element name="responseOption" type="dlg:responseOptionType" minOccurs="0" maxOccurs="unbounded" />
+      </xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="userResponse">
+		<xsd:complexType>
+			<xsd:sequence>
+        <xsd:element name="messageID" type="xsd:string" minOccurs="1" maxOccurs="1" />
+				<xsd:element name="responseID" type="xsd:string"
+					minOccurs="0" maxOccurs="1" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:complexType name="responseOptionType">
+	 <xsd:sequence>
+	   <xsd:element name="responseID" type="xsd:string" minOccurs="1" maxOccurs="1" />
+	   <xsd:element name="shortResponse" type="xsd:string" minOccurs="1" maxOccurs="1" />
+	   <xsd:element name="longResponse" type="xsd:string" minOccurs="0" maxOccurs="1" />
+	 </xsd:sequence>
+	 <xsd:attribute name="followup" type="xsd:boolean" use="optional"/>
+	</xsd:complexType>
+
+
+</xsd:schema>

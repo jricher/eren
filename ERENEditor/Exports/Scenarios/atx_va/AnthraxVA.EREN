@@ -1,0 +1,17 @@
+<ERENProject>
+	<ScenarioFile>/ERENFiles/Scenario.XML</ScenarioFile>
+	<DialogueFiles>
+		<DialogueFile>
+			<path>/ERENFiles/NPCDlgs/AirportManager.xml</path>
+		</DialogueFile>
+		<DialogueFile>
+			<path>/ERENFiles/NPCDlgs/ChesapeakePH.xml</path>
+		</DialogueFile>
+		<DialogueFile>
+			<path>/ERENFiles/NPCDlgs/DEOC_assistant.xml</path>
+		</DialogueFile>
+	</DialogueFiles>
+	<Resources>
+		
+	</Resources>
+</ERENProject>

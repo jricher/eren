@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Document   : Pod.xml
+    Created on : November 23, 2010, 4:05 PM
+    Author     : JWINSTON
+    Description:
+        Purpose of the document follows.
+-->
+<scxml xmlns="http://www.w3.org/2005/07/scxml"
+       xmlns:cs="http://commons.apache.org/scxml"
+       version="1.0"
+       profile="ecmascript"
+       initial="pod">
+
+    <parallel id="pod">
+        <state id="overall" initial="unActivated">
+            <state id="unActivated">
+                <transition event="activate" target="beingActivated"/>
+            </state>
+
+            <state id="beingActivated">
+                <transition event="doneActivating" cond="In('hasMeds') and In('hasEquipment') and In('hasMedStaff') and In('hasSecurityStaff') and In('hasOperationsStaff')" target="activated"/>
+            </state>
+
+            <state id="activated">
+                <transition event="open"  target="open"/>
+            </state>
+
+            <state id="open">
+                <transition event="riot" target="riot"/>
+                <transition event="close" target="closing"/>
+            </state>
+
+            <state id="riot">
+                <transition event="calm" target="open"/>
+                <transition event="close" target="closing"/>
+            </state>
+
+            <state id="closing">
+                <transition event="closed" target="unActivated"/>
+            </state>
+        </state>
+
+        <state id="meds" initial="noMeds">
+            <state id="noMeds">
+                <transition event="gotMeds" target="hasMeds"/>
+            </state>
+            <state id="hasMeds">
+            </state>
+        </state>
+
+        <state id="equipment" initial="noEquipment">
+            <state id="noEquipment">
+                <transition event="gotEquipment" target="hasEquipment"/>
+            </state>
+            <state id="hasEquipment">
+            </state>
+        </state>
+
+        <state id="medStaff" initial="noMedStaff">
+            <state id="noMedStaff">
+                <transition event="gotMedStaff" target="hasMedStaff"/>
+            </state>
+            <state id="hasMedStaff">
+            </state>
+        </state>
+
+        <state id="securityStaff" initial="noSecurityStaff">
+            <state id="noSecurityStaff">
+                <transition event="gotSecurityStaff" target="hasSecurityStaff"/>
+            </state>
+            <state id="hasSecurityStaff">
+            </state>
+        </state>
+
+        <state id="operationsStaff" initial="noOperationsStaff">
+            <state id="noOperationsStaff">
+                <transition event="gotOperationsStaff" target="hasOperationsStaff"/>
+            </state>
+            <state id="hasOperationsStaff">
+            </state>
+        </state>
+
+        <state id="shiftStatus" initial="shiftStartState">
+            <state id= "shiftStartState">
+                <transition event="shiftEnded" target="shiftExpired"/>
+                <transition event="shiftReplaced" target="notShiftExpired"/>
+            </state>
+            <state id="notShiftExpired">
+                <transition event="shiftEnded" target="shiftExpired"/>
+            </state>
+            <state id="shiftExpired">
+                <transition event="shiftReplaced" target="notShiftExpired"/>
+            </state>
+        </state>
+
+        <state id="lastShiftRested" initial="shiftRested">
+            <state id="shiftRested">
+                <transition event="shiftSentHome" target="shiftNotRested"/>
+            </state>
+            <state id="shiftNotRested">
+                <transition event="shiftSleptEnough" target="shiftRested"/>
+            </state>
+        </state>
+    </parallel>
+</scxml>

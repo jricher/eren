@@ -1,0 +1,1051 @@
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0"
+	xmlns:cs="http://commons.apache.org/scxml" xmlns:cst="urn:mitre:eren:dlg:custom:1.0"
+	xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:eren="urn:mitre:eren:1.0"
+	xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+	xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg" xmlns:xi="http://www.w3.org/2001/XInclude"
+	id="DEOC_assistant" initialstate="DEOC_assistant:brain">
+
+	<parallel id="DEOC_assistant:brain">
+
+		<onentry>
+			<cs:var name="precedingUserMsg" expr="''" />
+			<cs:var name="precedingRsrcMsg" expr="''" />
+			<cs:var name="originatingRsrcMsg" expr="''" />
+
+			<cs:var name="PodID" expr="''" />
+			<cs:var name="rssPlan" expr="null" />
+			<cs:var name="podPlan" expr="null" />
+			<cs:var name="uspsPlan" expr="null" />
+		</onentry>
+
+		<state id="DEOC_assistant:attention" initial="DEOC_assistant:attention:waiting">
+			<state id="DEOC_assistant:attention:waiting">
+				<transition event="anthrax.notified" target="DEOC_assistant:attention:send">
+					<cst:eval expr="dm.addNpcEvent(msgSrc,'anthrax.notified',_eventdata)" />
+				</transition>
+				<transition event="rss.plan" target="DEOC_assistant:attention:send">
+					<cst:eval expr="dm.addNpcEvent(msgSrc,'rss.plan',_eventdata)" />
+					<log label="added rss plan" expr="_eventdata" />
+				</transition>
+				<transition event="pod.plan" target="DEOC_assistant:attention:send">
+					<cst:eval expr="dm.addNpcEvent(msgSrc,'pod.plan',_eventdata)" />
+				</transition>
+				<transition event="done.allocating.pods" target="DEOC_assistant:attention:send">
+					<cst:eval
+						expr="dm.addNpcEvent(msgSrc,'done.allocating.pods',_eventdata)" />
+				</transition>
+				<transition event="usps.plan" target="DEOC_assistant:attention:send">
+					<cst:eval expr="dm.addNpcEvent(msgSrc,'usps.plan',_eventdata)" />
+					<log label="added usps plan" expr="_eventdata" />
+				</transition>
+				<transition event="open.new.pod" target="DEOC_assistant:attention:send">
+					<cst:eval expr="dm.addNpcEvent(msgSrc,'open.new.pod',_eventdata)" />
+				</transition>
+				<transition event="review.public.briefing" target="DEOC_assistant:attention:send">
+					<cst:eval
+						expr="dm.addNpcEvent(msgSrc,'review.public.briefing',_eventdata)" />
+				</transition>
+			</state>
+
+			<state id="DEOC_assistant:attention:send">
+				<transition target="DEOC_assistant:attention:waiting">
+					<send event="'event.received'" />
+				</transition>
+			</state>
+		</state>
+
+
+		<state id="DEOC_assistant:dialogues" initial="DEOC_assistant:idle">
+
+			<state id="DEOC_assistant:idle">
+				<onentry>
+					<cs:var name="savedEvent" expr="dm.getNpcEvent(msgSrc)" />
+				</onentry>
+
+				<transition cond="dm.getEventName(savedEvent).equals('anthrax.notified')"
+					target="DEOC_assistant:activateEOC" />
+				<transition cond="dm.getEventName(savedEvent).equals('rss.plan')"
+					target="DEOC_assistant:confirmRSSPlan">
+					<assign name="rssPlan" expr="savedEvent.getPayload()" />
+				</transition>
+				<transition cond="dm.getEventName(savedEvent).equals('pod.plan')"
+					target="DEOC_assistant:confirmPODPlan">
+					<assign name="podPlan" expr="savedEvent.getPayload()" />
+				</transition>
+				<transition
+					cond="dm.getEventName(savedEvent).equals('done.allocating.pods')"
+					target="DEOC_assistant:reviewMayorBriefing" />
+				<transition cond="dm.getEventName(savedEvent).equals('usps.plan')"
+					target="DEOC_assistant:confirmUspsPlan">
+					<assign name="uspsPlan" expr="savedEvent.getPayload()" />
+				</transition>
+				<transition cond="dm.getEventName(savedEvent).equals('open.new.pod')"
+					target="DEOC_assistant:openNewPOD">
+					<assign name="PodID" expr="savedEvent.getPayload().PodID" />
+				</transition>
+				<transition
+					cond="dm.getEventName(savedEvent).equals('review.public.briefing')"
+					target="DEOC_assistant:reviewPublicBriefing" />
+				<transition event="event.received" target="DEOC_assistant:gotEvent" />
+			</state>
+
+			<state id="DEOC_assistant:gotEvent">
+				<transition target="DEOC_assistant:idle" />
+			</state>
+
+			<!-- This is triggered at the beginning of the scenario, after the message 
+				that there are sick people at the hospital. -->
+			<state id="DEOC_assistant:activateEOC">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'notify'" />
+					<cs:var name="messageSummary" expr="'Prepare Response Plan'" />
+					<cs:var name="messageText"
+						expr="'Please meet with your Operations Chief and Communications Chief (JIC) to delegate initial actions.  Tell JIC to draft two briefings (to be reviewed by you before sending), one for the public and one for the Mayor to guide him in asking for resources.  Inform Ops Chief that he or she will be preparing a resource allocation plan for PODs.'" />
+					<cs:var name="numResponses" expr="0" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID" target="DEOC_assistant:PodOrUsps">
+				</transition>
+			</state>
+
+			<state id="DEOC_assistant:PodOrUsps">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'question'" />
+					<cs:var name="messageSummary" expr="'Start response plan - POD or USPS?'" />
+					<cs:var name="messageText"
+						expr="'National Stockpile medication has been requested from CDC. It is time to start preparing to distribute these meds when they arrive. Should we set up Points of Distribution (PODs) or use the Postal Service (USPS) first?'" />
+					<cs:var name="numResponses" expr="2" />
+					<cs:var name="responseID0" expr="messageID+':0'" />
+					<cs:var name="responseFollowup0" expr="true" />
+					<cs:var name="shortResponse0" expr="'POD'" />
+					<cs:var name="longResponse0"
+						expr="'PODs can provide a better standard of care and serve more people'" />
+					<cs:var name="responseID1" expr="messageID+':1'" />
+					<cs:var name="responseFollowup1" expr="true" />
+					<cs:var name="shortResponse1" expr="'USPS'" />
+					<cs:var name="longResponse1"
+						expr="'The postal service can provide efficient delivery, 150 people per hour per letter carrier. PODs may not be able to open unitl the security needed for USPS delivery is freed.'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+					target="DEOC_assistant:firstPod">
+				</transition>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+					target="DEOC_assistant:usps">
+				</transition>
+			</state>
+
+
+			<state id="DEOC_assistant:usps">
+				<onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+					xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+					xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+					xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="messageType" expr="'requisition.resource'" />
+					<cs:var name="resourceID" expr="'USPS'" />
+					<cs:var name="resourceName" expr="'USPS Delivery'" />
+					<cs:var name="resourceTypeValue" expr="'USPS'" />
+					<cs:var name="scheduleType" expr="'RequestedArrival'" />
+					<cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+					<!-- We may not need to send this message -->
+					<cst:sendResourceMessage />
+				</onentry>
+				<transition target="DEOC_assistant:requestedUsps" />
+			</state>
+
+			<state id="DEOC_assistant:requestedUsps">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'notify'" />
+					<cs:var name="messageSummary" expr="'USPS requested'" />
+					<cs:var name="messageText"
+						expr="'I have authorized distribution of medication by the US Postal Service'" />
+					<cs:var name="numResponses" expr="0" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input" target="DEOC_assistant:PodOrIdle" />
+			</state>
+
+			<state id="DEOC_assistant:PodOrIdle">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'question'" />
+					<cs:var name="messageSummary" expr="'Plan POD?'" />
+					<cs:var name="messageText"
+						expr="'Should we set up Points of Distribution (PODs) now?'" />
+					<cs:var name="numResponses" expr="2" />
+					<cs:var name="responseID0" expr="messageID+':0'" />
+					<cs:var name="responseFollowup0" expr="true" />
+					<cs:var name="shortResponse0" expr="'Yes'" />
+					<cs:var name="longResponse0" expr="'We need PODs, too'" />
+					<cs:var name="responseID1" expr="messageID+':1'" />
+					<cs:var name="responseFollowup1" expr="false" />
+					<cs:var name="shortResponse1" expr="'No'" />
+					<cs:var name="longResponse1"
+						expr="'The postal service delivery is sufficient for now.'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+					target="DEOC_assistant:firstPod">
+				</transition>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+					target="DEOC_assistant:idle">
+				</transition>
+			</state>
+
+			<state id="DEOC_assistant:firstPod">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'question'" />
+					<cs:var name="messageSummary" expr="'Start response plan?'" />
+					<cs:var name="messageText"
+						expr="'We are putting the emergency response plan into action. Which location would you like to use as the first Point of Distribution?'" />
+					<cs:var name="numResponses" expr="5" />
+					<cs:var name="responseID0" expr="messageID+':0'" />
+					<cs:var name="responseFollowup0" expr="true" />
+					<cs:var name="shortResponse0" expr="dm.getPodName('POD_01')" />
+					<cs:var name="longResponse0"
+						expr="dm.getPodName('POD_01')+' looks like it is closest to the center of the outbreak.'" />
+					<cs:var name="responseID1" expr="messageID+':1'" />
+					<cs:var name="responseFollowup1" expr="true" />
+					<cs:var name="shortResponse1" expr="dm.getPodName('POD_02')" />
+					<cs:var name="longResponse1"
+						expr="dm.getPodName('POD_02')+' looks like it is closest to the center of the outbreak.'" />
+					<cs:var name="responseID2" expr="messageID+':2'" />
+					<cs:var name="responseFollowup2" expr="true" />
+					<cs:var name="shortResponse2" expr="dm.getPodName('POD_03')" />
+					<cs:var name="longResponse2"
+						expr="dm.getPodName('POD_03')+' looks like it is closest to the center of the outbreak.'" />
+					<cs:var name="responseID3" expr="messageID+':3'" />
+					<cs:var name="responseFollowup3" expr="true" />
+					<cs:var name="shortResponse3" expr="dm.getPodName('POD_04')" />
+					<cs:var name="longResponse3"
+						expr="dm.getPodName('POD_04')+' looks like it is closest to the center of the outbreak.'" />
+					<cs:var name="responseID4" expr="messageID+':4'" />
+					<cs:var name="responseFollowup4" expr="true" />
+					<cs:var name="shortResponse4" expr="dm.getPodName('POD_05')" />
+					<cs:var name="longResponse4"
+						expr="dm.getPodName('POD_05')+' looks like it is closest to the center of the outbreak.'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+					target="DEOC_assistant:requestNow">
+					<assign name="PodID" expr="'POD_01'" />
+				</transition>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+					target="DEOC_assistant:requestNow">
+					<assign name="PodID" expr="'POD_02'" />
+				</transition>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+					target="DEOC_assistant:requestNow">
+					<assign name="PodID" expr="'POD_03'" />
+				</transition>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID3"
+					target="DEOC_assistant:requestNow">
+					<assign name="PodID" expr="'POD_04'" />
+				</transition>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID4"
+					target="DEOC_assistant:requestNow">
+					<assign name="PodID" expr="'POD_05'" />
+				</transition>
+			</state>
+
+			<state id="DEOC_assistant:requestNow">
+				<onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+					xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+					xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+					xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="messageType" expr="'requisition.resource'" />
+					<cs:var name="resourceID" expr="PodID" />
+					<cs:var name="resourceName" expr="dm.getPodName(PodID)" />
+					<cs:var name="resourceTypeValue" expr="'POD'" />
+					<cs:var name="scheduleType" expr="'RequestedArrival'" />
+					<cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+					<cs:var name="latitude" expr="dm.getPodLat(PodID)" />
+					<cs:var name="longitude" expr="dm.getPodLon(PodID)" />
+					<cst:sendResourceMessage />
+				</onentry>
+				<transition target="DEOC_assistant:askAnotherPod" />
+			</state>
+
+			<state id="DEOC_assistant:askAnotherPod">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'notify'" />
+					<cs:var name="messageSummary" expr="'POD requested'" />
+					<cs:var name="messageText"
+						expr="'I have requisitioned the POD location at '+dm.getPodName(PodID)+'. You will
+                  be informed when the POD is ready to open to the public. Would you like to open another POD at this time?'" />
+					<cs:var name="resourceList" expr="'POD'" />
+					<cs:var name="filter"
+						expr="'dm.hasResourceStatus('+dm.getApostrophe()+'%RID%'+dm.getApostrophe()+','+dm.getApostrophe()+'%TYPE%'+dm.getApostrophe()+','+dm.getApostrophe()+'AVAILABLE'+dm.getApostrophe()+')'" />
+					<cs:var name="responseFollowup" expr="true" />
+					<cs:var name="description"
+						expr="'dm.getPodName('+dm.getApostrophe()+'%RID%'+dm.getApostrophe()+')'" />
+					<cs:var name="shortResponse" expr="'%DESCRIPTION%'" />
+					<cs:var name="longResponse" expr="'Yes, open a POD at %DESCRIPTION%'" />
+					<cs:var name="altShortResponse" expr="'No more PODs'" />
+					<cs:var name="altLongResponse"
+						expr="'No, I will open more PODs later if necessary'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq _eventdata.getMessageID()+':alt'"
+					target="DEOC_assistant:askCallNeighborResource">
+					<send event="'done.requesting.pods'" target="'Ops_assistant'"
+						targettype="'dm'" />
+				</transition>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID" target="DEOC_assistant:requestNow">
+					<assign name="PodID" expr="_eventdata.getResponseID()" />
+				</transition>
+			</state>
+
+			<state id="DEOC_assistant:askCallNeighborResource">
+				<onentry>
+					<assign name="precedingUserMsg" expr="''" />
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'question'" />
+					<cs:var name="messageSummary" expr="'Contact neighboring EOC?'" />
+					<cs:var name="messageText"
+						expr="'Would you like to contact the neighboring Emergency Operation Center to ask for EMAC assistance?'" />
+					<cs:var name="numResponses" expr="2" />
+					<cs:var name="responseID0" expr="messageID+':0'" />
+					<cs:var name="shortResponse0" expr="'Yes, I would'" />
+					<cs:var name="longResponse0" expr="'Yes, I would like to call them right now'" />
+					<cs:var name="responseID1" expr="messageID+':1'" />
+					<cs:var name="shortResponse1" expr="'No thanks'" />
+					<cs:var name="longResponse1"
+						expr="'No, I don'+dm.getApostrophe()+'t have time to talk to them right now.'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+					target="DEOC_assistant:closedPods">
+					<send event="'request.emac'" target="'Ops_assistant'"
+						targettype="'dm'" />
+				</transition>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+					target="DEOC_assistant:closedPods">
+				</transition>
+			</state>
+
+			<state id="DEOC_assistant:closedPods">
+				<onentry>
+					<assign name="precedingUserMsg" expr="''" />
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'question'" />
+					<cs:var name="messageSummary" expr="'Make calls for Closed PODs?'" />
+					<cs:var name="messageText"
+						expr="'Would you like to make calls in order to set aside antibiotics for Closed PODs?'" />
+					<cs:var name="numResponses" expr="2" />
+					<cs:var name="responseID0" expr="messageID+':0'" />
+					<cs:var name="shortResponse0" expr="'Yes, I would'" />
+					<cs:var name="longResponse0"
+						expr="'Yes, I will start by calling the nursing home.'" />
+					<cs:var name="responseID1" expr="messageID+':1'" />
+					<cs:var name="shortResponse1" expr="'No thanks'" />
+					<cs:var name="longResponse1"
+						expr="'No, I don'+dm.getApostrophe()+'t have time for this right now, but I am sure these places will send someone to pick up meds.'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+					target="DEOC_assistant:engageStateEntities">
+					<send event="'closed.pod.allocation'" target="'RSS_OpsMgr'"
+						targettype="'dm'" />
+				</transition>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+					target="DEOC_assistant:engageStateEntities">
+				</transition>
+			</state>
+
+
+			<state id="DEOC_assistant:engageStateEntities">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'question'" />
+					<cs:var name="messageSummary" expr="'Alert State agencies'" />
+					<cs:var name="messageText"
+						expr="'Which State agencies should be alerted of this incident at this point in time?'" />
+					<cs:var name="numResponses" expr="4" />
+					<!-- This is the best answer. -->
+					<cs:var name="responseID0" expr="messageID+':0'" />
+					<cs:var name="responseFollowup0" expr="true" />
+					<cs:var name="shortResponse0" expr="'Health related divisions plus EOC'" />
+					<cs:var name="longResponse0"
+						expr="'The State Public Health Department, State EOC, Medical Transportation Division, Behavioral Health Division, and Agricultural Division'" />
+					<cs:var name="responseID1" expr="messageID+':1'" />
+					<cs:var name="responseFollowup1" expr="true" />
+					<cs:var name="shortResponse1" expr="'Health, mortuary, EPA'" />
+					<cs:var name="longResponse1"
+						expr="'State Public Health Department, State Mortuary Services, State Environmental Protection Agency.'" />
+					<cs:var name="responseID2" expr="messageID+':2'" />
+					<cs:var name="responseFollowup2" expr="true" />
+					<cs:var name="shortResponse2" expr="'none'" />
+					<cs:var name="longResponse2"
+						expr="'None at this time, it is too early to give an accurate description.'" />
+					<cs:var name="responseID3" expr="messageID+':3'" />
+					<cs:var name="responseFollowup3" expr="true" />
+					<cs:var name="shortResponse3" expr="'Fire, Health, Behavioral'" />
+					<cs:var name="longResponse3"
+						expr="'State Fire and Rescue, Public Health, Behavioral Health.'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition cond="_eventdata.getMessageID() eq messageID"
+					target="DEOC_assistant:delegateToAirfield" />
+			</state>
+
+
+			<state id="DEOC_assistant:delegateToAirfield">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'question'" />
+					<cs:var name="messageSummary" expr="'Personnel to airfield'" />
+					<cs:var name="messageText"
+						expr="'The SNS plane will be arriving soon at your closest aifield with large packs of antibiotics.  Who would you like to send for greeting and and transportation to the RSS for breakdown?'" />
+					<cs:var name="numResponses" expr="2" />
+          <cs:var name="responseID0" expr="messageID+':0'" />
+          <cs:var name="responseFollowup0" expr="true" />
+          <cs:var name="shortResponse0" expr="'Government designee'" />
+          <cs:var name="longResponse0"
+            expr="'State Government has a designee to send, I will tell them to get ready now.'" />
+          <!-- This is the best answer. Could improve players score or efficiency in some way?-->
+          <cs:var name="responseID1" expr="messageID+':1'" />
+          <cs:var name="responseFollowup1" expr="true" />
+          <cs:var name="shortResponse1" expr="'Government plus RSS rep'" />
+          <cs:var name="longResponse1"
+            expr="'The Governor'+dm.getApostrophe()+'s State Health Official has a designee to sign for it, plus I will designate a sub-group of our RSS team.'" />
+          <cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition cond="_eventdata.getMessageID() eq messageID"
+					target="DEOC_assistant:idle" />
+			</state>
+
+
+			<!-- Most important thing is this message pops up at the same time the 
+				JIC's does, telling it to meet with the DEOC. Can happen after DEOC calls 
+				neighbor resource but does not have to. This will be triggered by a 'review.public.briefing' 
+				event sent by the JIC assistant when the briefing is ready to be reviewed -->
+			<state id="DEOC_assistant:reviewPublicBriefing">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'notify'" />
+					<cs:var name="messageSummary" expr="'Review public briefing'" />
+					<cs:var name="messageText"
+						expr="'It is time review the public briefing you assigned to the JIC earlier, to make sure its suitable.'" />
+					<cs:var name="numResponses" expr="0" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID" target="DEOC_assistant:idle">
+				</transition>
+			</state>
+
+			<state id="DEOC_assistant:confirmRSSPlan">
+				<onentry>
+					<assign name="precedingUserMsg" expr="''" />
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'question'" />
+					<cs:var name="messageSummary" expr="'Confirm RSS allocation plan?'" />
+					<cs:var name="messageText"
+						expr="'The operations manager has specified the following allocations for the RSS facility: '+rssPlan.RSSclinical+' clinical staff, '+rssPlan.RSSLE+' law enforcement staff, and '+rssPlan.RSSOps+' operational staff. Would you like to approve this plan?'" />
+					<cs:var name="numResponses" expr="2" />
+					<cs:var name="responseID0" expr="messageID+':0'" />
+					<cs:var name="responseFollowup0" expr="true" />
+					<cs:var name="shortResponse0" expr="'Yes, approved'" />
+					<cs:var name="longResponse0" expr="'Yes, I approve the plan.'" />
+					<cs:var name="responseID1" expr="messageID+':1'" />
+					<cs:var name="shortResponse1" expr="'Do not approve'" />
+					<cs:var name="longResponse1" expr="'No, I am not satisfied with this plan.'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+					target="DEOC_assistant:approveRSSPlan">
+				</transition>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+					target="DEOC_assistant:idle">
+					<assign name="rssPlan" expr="null" />
+					<send event="'reject.rss.plan'" target="'Ops_assistant'"
+						targettype="'dm'" />
+				</transition>
+			</state>
+
+
+			<state id="DEOC_assistant:approveRSSPlan" initial="DEOC_assistant:RSS:commitEquipment">
+				<state id="DEOC_assistant:RSS:commitEquipment">
+					<onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+						xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+						xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+						xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="messageType" expr="'commit.resource'" />
+						<cs:var name="resourceName" expr="'equipment set'" />
+						<cs:var name="resourceTypeValue" expr="'EQUIPMENT_SET'" />
+						<cs:var name="quantity" expr="1" />
+						<cs:var name="scheduleType" expr="'Committed'" />
+						<cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+						<cs:var name="locationDescription" expr="'RSS_01'" />
+						<cst:sendResourceMessage />
+					</onentry>
+					<transition target="DEOC_assistant:RSS:commitClinical" />
+
+				</state>
+
+
+				<state id="DEOC_assistant:RSS:commitClinical">
+					<onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+						xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+						xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+						xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="messageType" expr="'commit.resource'" />
+						<cs:var name="resourceName" expr="'clinical staff'" />
+						<cs:var name="resourceTypeValue" expr="'CLINICAL_STAFF'" />
+						<cs:var name="quantity" expr="rssPlan.RSSclinical" />
+						<cs:var name="scheduleType" expr="'Committed'" />
+						<cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+						<cs:var name="locationDescription" expr="'RSS_01'" />
+						<cst:sendResourceMessage />
+					</onentry>
+					<transition target="DEOC_assistant:RSS:commitLE" />
+				</state>
+
+				<state id="DEOC_assistant:RSS:commitLE">
+					<onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+						xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+						xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+						xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="messageType" expr="'commit.resource'" />
+						<cs:var name="resourceName" expr="'law enforcement staff'" />
+						<cs:var name="resourceTypeValue" expr="'LE_STAFF'" />
+						<cs:var name="quantity" expr="rssPlan.RSSLE" />
+						<cs:var name="scheduleType" expr="'Committed'" />
+						<cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+						<cs:var name="locationDescription" expr="'RSS_01'" />
+						<cst:sendResourceMessage />
+					</onentry>
+					<transition target="DEOC_assistant:RSS:commitOps" />
+				</state>
+
+				<state id="DEOC_assistant:RSS:commitOps">
+					<onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+						xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+						xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+						xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="messageType" exp="'commit.resource'" />
+						<cs:var name="resourceName" expr="'operations staff'" />
+						<cs:var name="resourceTypeValue" expr="'OPS_STAFF'" />
+						<cs:var name="quantity" expr="rssPlan.RSSOps" />
+						<cs:var name="scheduleType" expr="'Committed'" />
+						<cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+						<cs:var name="locationDescription" expr="'RSS_01'" />
+						<cst:sendResourceMessage />
+					</onentry>
+					<transition target="DEOC_assistant:informRSScommitted" />
+				</state>
+
+
+				<state id="DEOC_assistant:informRSScommitted">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'EOCdir'" />
+						<cs:var name="messageType" expr="'notify'" />
+						<cs:var name="messageSummary" expr="'RSS plan approved'" />
+						<cs:var name="messageText"
+							expr="'The resource allocation plan for the RSS facility has been approved and submitted.'" />
+						<cs:var name="numResponses" expr="0" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID" target="DEOC_assistant:idle">
+						<assign name="rssPlan" expr="null" />
+					</transition>
+				</state>
+			</state>
+
+			<state id="DEOC_assistant:confirmPODPlan">
+				<onentry>
+					<assign name="precedingUserMsg" expr="''" />
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'question'" />
+					<cs:var name="messageSummary" expr="'Confirm POD allocation plan?'" />
+					<cs:var name="messageText"
+						expr="'The operations manager has specified the following allocations for the POD at '+dm.getPodName(podPlan.PodID)+': '+podPlan.PodClinical+' clinical staff, '+podPlan.PodLE+' law enforcement staff, and '+podPlan.PodOps+' operational staff. Would you like to approve this plan?'" />
+					<cs:var name="numResponses" expr="2" />
+					<cs:var name="responseID0" expr="messageID+':0'" />
+					<cs:var name="responseFollowup0" expr="true" />
+					<cs:var name="shortResponse0" expr="'Yes, approved'" />
+					<cs:var name="longResponse0" expr="'Yes, I approve the plan.'" />
+					<cs:var name="responseID1" expr="messageID+':1'" />
+					<cs:var name="responseFollowup1" expr="true" />
+					<cs:var name="shortResponse1" expr="'Do not approve'" />
+					<cs:var name="longResponse1" expr="'No, I am not satisfied with this plan.'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+					target="DEOC_assistant:approvePodPlan">
+				</transition>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+					target="DEOC_assistant:idle">
+					<assign name="podPlan" expr="null" />
+					<send event="'reject.pod.plan'" namelist="PodID" target="'Ops_assistant'"
+						targettype="'dm'" />
+				</transition>
+			</state>
+
+
+			<state id="DEOC_assistant:approvePodPlan" initial="DEOC_assistant:Pod:commitEquipment">
+				<state id="DEOC_assistant:Pod:commitEquipment">
+					<onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+						xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+						xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+						xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="messageType" expr="'commit.resource'" />
+						<cs:var name="resourceName" expr="'equipment set'" />
+						<cs:var name="resourceTypeValue" expr="'EQUIPMENT_SET'" />
+						<cs:var name="quantity" expr="1" />
+						<cs:var name="scheduleType" expr="'Committed'" />
+						<cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+						<cs:var name="locationDescription" expr="podPlan.PodID" />
+						<cst:sendResourceMessage />
+					</onentry>
+					<transition target="DEOC_assistant:Pod:commitClinical" />
+				</state>
+
+				<state id="DEOC_assistant:Pod:commitClinical">
+					<onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+						xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+						xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+						xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="messageType" expr="'commit.resource'" />
+						<cs:var name="resourceName" expr="'clinical staff'" />
+						<cs:var name="resourceTypeValue" expr="'CLINICAL_STAFF'" />
+						<cs:var name="quantity" expr="podPlan.PodClinical" />
+						<cs:var name="scheduleType" expr="'Committed'" />
+						<cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+						<cs:var name="locationDescription" expr="podPlan.PodID" />
+						<cst:sendResourceMessage />
+					</onentry>
+					<transition target="DEOC_assistant:Pod:commitLE" />
+				</state>
+
+				<state id="DEOC_assistant:Pod:commitLE">
+					<onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+						xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+						xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+						xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="messageType" expr="'commit.resource'" />
+						<cs:var name="resourceName" expr="'law enforcement staff'" />
+						<cs:var name="resourceTypeValue" expr="'LE_STAFF'" />
+						<cs:var name="quantity" expr="podPlan.PodLE" />
+						<cs:var name="scheduleType" expr="'Committed'" />
+						<cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+						<cs:var name="locationDescription" expr="podPlan.PodID" />
+						<cst:sendResourceMessage />
+					</onentry>
+					<transition target="DEOC_assistant:Pod:commitOps" />
+				</state>
+
+				<state id="DEOC_assistant:Pod:commitOps">
+					<onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+						xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+						xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+						xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="messageType" expr="'commit.resource'" />
+						<cs:var name="resourceName" expr="'operations staff'" />
+						<cs:var name="resourceTypeValue" expr="'OPS_STAFF'" />
+						<cs:var name="quantity" expr="podPlan.PodOps" />
+						<cs:var name="scheduleType" expr="'Committed'" />
+						<cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+						<cs:var name="locationDescription" expr="podPlan.PodID" />
+						<cst:sendResourceMessage />
+					</onentry>
+					<transition target="DEOC_assistant:informPodCommitted" />
+				</state>
+
+				<state id="DEOC_assistant:informPodCommitted">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'EOCdir'" />
+						<cs:var name="messageType" expr="'notify'" />
+						<cs:var name="messageSummary" expr="'Pod plan approved'" />
+						<cs:var name="messageText"
+							expr="'The resource allocation plan for the POD at '+dm.getPodName(podPlan.PodID)+' has been approved and submitted.'" />
+						<cs:var name="numResponses" expr="0" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID" target="DEOC_assistant:idle">
+						<assign name="podPlan" expr="null" />
+					</transition>
+				</state>
+			</state>
+
+			<!-- This should happen soon after the Ops Chief allocates the RSS and 
+				POD resources, since this brief will include all content from the public 
+				brief plus resource allocation/requests. It should also happen at the same 
+				time the message to JIC and Ops Chief pops up (Ops Chief is in on this one 
+				too). -->
+			<state id="DEOC_assistant:reviewMayorBriefing">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'notify'" />
+					<cs:var name="messageSummary" expr="'Review the Mayor briefing.'" />
+					<cs:var name="messageText"
+						expr="'It is time to review the Mayor'+dm.getApostrophe()+'s briefing you assigned to the JIC earlier, to make sure it suitable. It should include information from the public'+dm.getApostrophe()+'s briefing, plus resource allocations and requests'" />
+					<cs:var name="numResponses" expr="0" />
+					<cst:sendUserMessage />
+					<send event="'review.mayor.briefing'" target="'Ops_assistant,JIC_assistant'"
+						targettype="'dm'" />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID" target="DEOC_assistant:instructHazMatTeam">
+				</transition>
+			</state>
+
+			<!-- This should happen right after the DEOC reviews the Mayor briefing. -->
+			<state id="DEOC_assistant:instructHazMatTeam">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'question'" />
+					<cs:var name="messageSummary" expr="'HazMat Collection'" />
+					<cs:var name="messageText"
+						expr="'You should instruct the local HazMat Team to collect environmental samples, to inform our understanding of the anthrax plume.  Where should they collect samples first (consult with Ops)?'" />
+					<cs:var name="numResponses" expr="4" />
+					<cs:var name="responseID0" expr="messageID+':0'" />
+					<cs:var name="shortResponse0" expr="'Daytime zips'" />
+					<cs:var name="longResponse0"
+						expr="'HazMat should start where the patients'+dm.getApostrophe()+' daytime zip codes were located'" />
+					<cs:var name="responseID1" expr="messageID+':1'" />
+					<cs:var name="shortResponse1" expr="'Hospital'" />
+					<cs:var name="longResponse1"
+						expr="'HazMat should go to the region around the hospital with the most sick patients.'" />
+					<!-- This is the best answer. -->
+					<cs:var name="responseID2" expr="messageID+':2'" />
+					<cs:var name="shortResponse2" expr="'Nightime zips'" />
+					<cs:var name="longResponse2"
+						expr="'HazMat should collect samples in the night zip code region.'" />
+					<!-- This is the worst answer. -->
+					<cs:var name="responseID3" expr="messageID+':3'" />
+					<cs:var name="shortResponse3" expr="'Schools'" />
+					<cs:var name="longResponse3"
+						expr="'HazMat should collect near schools first to make sure children are safe.'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition cond="_eventdata.getMessageID() eq messageID"
+					target="DEOC_assistant:idle"></transition>
+			</state>
+
+			<state id="DEOC_assistant:openNewPOD">
+
+				<onentry>
+					<assign name="precedingUserMsg" expr="''" />
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'inform'" />
+					<cs:var name="messageSummary" expr="'Open New POD'" />
+					<cs:var name="messageText"
+						expr="'I see that you would like to open a POD at '+dm.getPodName(PodID)+'. Do you want to close another POD or open this one in addition?'" />
+					<cs:var name="numResponses" expr="2" />
+					<cs:var name="responseID0" expr="messageID+':0'" />
+					<cs:var name="responseFollowup0" expr="true" />
+					<cs:var name="shortResponse0" expr="'Close a POD'" />
+					<cs:var name="longResponse0" expr="'I would like to close a POD'" />
+					<cs:var name="responseID1" expr="messageID+':1'" />
+					<cs:var name="shortResponse1" expr="'Do not close'" />
+					<cs:var name="longResponse1"
+						expr="'This will be in addition to the currently active PODs'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+					target="DEOC_assistant:askCloseWhichPOD">
+				</transition>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+					target="DEOC_assistant:idle">
+				</transition>
+			</state>
+
+			<state id="DEOC_assistant:confirmUspsPlan">
+				<onentry>
+					<assign name="precedingUserMsg" expr="''" />
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'question'" />
+					<cs:var name="messageSummary" expr="'Confirm USPS allocation plan?'" />
+					<cs:var name="messageText"
+						expr="'The operations manager has specified the following allocations for USPS distribution: '+uspsPlan.UspsCarriers+' letter carriers, '+uspsPlan.UspsLE+' law enforcement. Would you like to approve this plan?'" />
+					<cs:var name="numResponses" expr="2" />
+					<cs:var name="responseID0" expr="messageID+':0'" />
+					<cs:var name="responseFollowup0" expr="true" />
+					<cs:var name="shortResponse0" expr="'Yes, approved'" />
+					<cs:var name="longResponse0" expr="'Yes, I approve the plan.'" />
+					<cs:var name="responseID1" expr="messageID+':1'" />
+					<cs:var name="responseFollowup1" expr="true" />
+					<cs:var name="shortResponse1" expr="'Do not approve'" />
+					<cs:var name="longResponse1" expr="'No, I am not satisfied with this plan.'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+					target="DEOC_assistant:approveUspsPlan">
+				</transition>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+					target="DEOC_assistant:idle">
+					<assign name="uspsPlan" expr="null" />
+					<send event="'reject.usps.plan'" target="'Ops_assistant'"
+						targettype="'dm'" />
+				</transition>
+			</state>
+
+			<state id="DEOC_assistant:approveUspsPlan" initial="DEOC_assistant:Usps:commitUsps">
+				<state id="DEOC_assistant:Usps:commitUsps">
+					<onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+						xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+						xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+						xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="messageType" expr="'commit.resource'" />
+						<cs:var name="resourceName" expr="'equipment set'" />
+						<cs:var name="resourceTypeValue" expr="'USPS'" />
+						<cs:var name="quantity" expr="1" />
+						<cs:var name="scheduleType" expr="'Committed'" />
+						<cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+						<cst:sendResourceMessage />
+					</onentry>
+					<transition target="DEOC_assistant:Usps:commitLetterCarriers" />
+				</state>
+				<state id="DEOC_assistant:Usps:commitLetterCarriers">
+					<onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+						xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+						xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+						xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="messageType" expr="'commit.resource'" />
+						<cs:var name="resourceName" expr="'equipment set'" />
+						<cs:var name="resourceTypeValue" expr="'LETTER_CARRIER'" />
+						<cs:var name="quantity" expr="uspsPlan.UspsCarriers" />
+						<cs:var name="scheduleType" expr="'Committed'" />
+						<cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+						<cs:var name="locationDescription" expr="'USPS'" />
+						<cst:sendResourceMessage />
+					</onentry>
+					<transition target="DEOC_assistant:Usps:commitLE" />
+				</state>
+
+				<state id="DEOC_assistant:Usps:commitLE">
+					<onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+						xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+						xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+						xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="messageType" expr="'commit.resource'" />
+						<cs:var name="resourceName" expr="'law enforcement staff'" />
+						<cs:var name="resourceTypeValue" expr="'LE_STAFF'" />
+						<cs:var name="quantity" expr="uspsPlan.UspsLE" />
+						<cs:var name="scheduleType" expr="'Committed'" />
+						<cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+						<cs:var name="locationDescription" expr="'USPS'" />
+						<cst:sendResourceMessage />
+					</onentry>
+					<transition target="DEOC_assistant:informUspsCommitted" />
+				</state>
+				<state id="DEOC_assistant:informUspsCommitted">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'EOCdir'" />
+						<cs:var name="messageType" expr="'notify'" />
+						<cs:var name="messageSummary" expr="'USPS plan approved'" />
+						<cs:var name="messageText"
+							expr="'The resource allocation plan USPS distribution has been approved and submitted.'" />
+						<cs:var name="numResponses" expr="0" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID" target="DEOC_assistant:idle">
+						<assign name="uspsPlan" expr="null" />
+					</transition>
+				</state>
+			</state>
+
+			<state id="DEOC_assistant:askCloseWhichPOD">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'question'" />
+					<cs:var name="messageSummary" expr="'Which POD?'" />
+					<cs:var name="messageText"
+						expr="'Which of the active PODs would you like to close?'" />
+					<cs:var name="resourceList" expr="'POD'" />
+					<cs:var name="filter"
+						expr="'!dm.hasResourceStatus('+dm.getApostrophe()+'%RID%'+dm.getApostrophe()+','+dm.getApostrophe()+'%TYPE%'+dm.getApostrophe()+','+dm.getApostrophe()+'AVAILABLE'+dm.getApostrophe()+')'" />
+					<cs:var name="responseFollowup" expr="true" />
+					<cs:var name="description"
+						expr="'dm.getPodName('+dm.getApostrophe()+'%RID%'+dm.getApostrophe()+')'" />
+					<cs:var name="shortResponse" expr="'Close %DESCRIPTION%'" />
+					<cs:var name="longResponse"
+						expr="'I would like to close the POD at %DESCRIPTION%'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID" target="DEOC_assistant:closePOD">
+					<assign name="PodID" expr="_eventdata.getResponseID()" />
+				</transition>
+			</state>
+
+
+			<state id="DEOC_assistant:closePOD">
+				<onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+					xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+					xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+					xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="messageType" expr="'release.resource'" />
+					<cs:var name="resourceID" expr="PodID" />
+					<cs:var name="resourceName" expr="dm.getPodName(PodID)" />
+					<cs:var name="resourceTypeValue" expr="'POD'" />
+					<cs:var name="scheduleType" expr="'RequestedReturnDeparture'" />
+					<cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+					<cs:var name="locationDescription" expr="PodID" />
+					<cst:sendResourceMessage />
+				</onentry>
+				<transition target="DEOC_assistant:informPodClosureNotified" />
+			</state>
+
+			<state id="DEOC_assistant:informPodClosureNotified">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'notify'" />
+					<cs:var name="messageSummary" expr="'Pod closing'" />
+					<cs:var name="messageText"
+						expr="'The POD at '+dm.getPodName(PodID)+' has been notified to close down.'" />
+					<cs:var name="numResponses" expr="0" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID" target="DEOC_assistant:idle">
+				</transition>
+			</state>
+
+		</state>
+
+	</parallel>
+
+
+</scxml>

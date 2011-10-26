@@ -1,0 +1,933 @@
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0"
+	xmlns:cs="http://commons.apache.org/scxml" xmlns:cst="urn:mitre:eren:dlg:custom:1.0"
+	xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:eren="urn:mitre:eren:1.0"
+	xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+	xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg" xmlns:xi="http://www.w3.org/2001/XInclude"
+	id="JIC_assistant" initialstate="JIC_assistant:brain">
+
+	<parallel id="JIC_assistant:brain">
+		<onentry>
+			<cs:var name="precedingUserMsg" expr="''" />
+			<cs:var name="precedingRsrcMsg" expr="''" />
+			<cs:var name="originatingRsrcMsg" expr="''" />
+			<cs:var name="PodID" expr="''" />
+
+		</onentry>
+
+		<state id="JIC_assistant:attention" initial="JIC_assistant:attention:waiting">
+			<state id="JIC_assistant:attention:waiting">
+				<transition event="initial.questions" target="JIC_assistant:attention:send">
+					<cst:eval expr="dm.addNpcEvent(msgSrc,'initial.questions',_eventdata)" />
+				</transition>
+				<transition event="hour.one.questions" target="JIC_assistant:attention:send">
+					<cst:eval expr="dm.addNpcEvent(msgSrc,'hour.one.questions',_eventdata)" />
+				</transition>
+				<transition event="bioagent.cocktail" target="JIC_assistant:attention:send">
+					<cst:eval expr="dm.addNpcEvent(msgSrc,'bioagent.cocktail',_eventdata)" />
+				</transition>
+				<transition event="fake.cipro" target="JIC_assistant:attention:send">
+					<cst:eval expr="dm.addNpcEvent(msgSrc,'fake.cipro',_eventdata)" />
+				</transition>
+				<transition event="review.mayor.briefing" target="JIC_assistant:attention:send">
+					<cst:eval
+						expr="dm.addNpcEvent(msgSrc,'review.mayor.briefing',_eventdata)" />
+				</transition>
+			</state>
+
+			<state id="JIC_assistant:attention:send">
+				<transition target="JIC_assistant:attention:waiting">
+					<send event="'event.received'" />
+				</transition>
+			</state>
+
+		</state>
+
+		<state id="JIC_assistant:dialogues" initial="JIC_assistant:idle">
+
+			<state id="JIC_assistant:idle">
+
+				<onentry>
+					<cs:var name="savedEvent" expr="dm.getNpcEvent(msgSrc)" />
+				</onentry>
+
+				<transition event="patients.arrive" target="JIC_assistant:initialBriefing" />
+				<transition cond="dm.getEventName(savedEvent) eq 'initial.questions'"
+					target="JIC_assistant:respondToPublic">
+				</transition>
+				<transition cond="dm.getEventName(savedEvent) eq 'hour.one.questions'"
+					target="JIC_assistant:publicQueries">
+				</transition>
+				<transition cond="dm.getEventName(savedEvent) eq 'bioagent.cocktail'"
+					target="JIC_assistant:bioagentCocktail">
+				</transition>
+				<transition cond="dm.getEventName(savedEvent) eq 'fake.cipro'"
+					target="JIC_assistant:fakeCipro">
+				</transition>
+				<transition cond="dm.getEventName(savedEvent) eq 'review.mayor.briefing'"
+					target="JIC_assistant:reviewMayorBriefing">
+				</transition>
+				<transition event="event.received" target="JIC_assistant:gotEvent" />
+			</state>
+
+			<state id="JIC_assistant:gotEvent">
+				<transition target="JIC_assistant:idle" />
+			</state>
+
+			<state id="JIC_assistant:initialBriefing" initial="JIC_assistant:prepareBriefing">
+				<onentry>
+					<cs:var name="briefingTone" expr="''" />
+					<cs:var name="briefingContent" expr="''" />
+					<cs:var name="healthMeasures" expr="''" />
+					<cs:var name="addressTerrorism" expr="''" />
+					<cs:var name="terrorismNuance" expr="''" />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+
+				<state id="JIC_assistant:prepareBriefing">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'Comms'" />
+						<cs:var name="messageType" expr="'notify'" />
+						<cs:var name="messageSummary" expr="'Prepare public briefing'" />
+						<cs:var name="messageText"
+							expr="'You will need to prepare a briefing to inform the public about the anthrax release.'" />
+						<cs:var name="numResponses" expr="0" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID" target="JIC_assistant:askBriefingTone">
+					</transition>
+				</state>
+
+				<state id="JIC_assistant:askBriefingTone">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'Comms'" />
+						<cs:var name="messageType" expr="'question'" />
+						<cs:var name="messageSummary" expr="'Briefing approach'" />
+						<cs:var name="messageText"
+							expr="'What should the general tone of the briefing be?'" />
+						<cs:var name="numResponses" expr="4" />
+						<cs:var name="responseID0" expr="messageID+':0'" />
+						<cs:var name="responseFollowup0" expr="true" />
+						<cs:var name="shortResponse0" expr="'Serious and confident'" />
+						<cs:var name="longResponse0"
+							expr="'It is best for the public to think everything is under control, even if it is not.'" />
+						<cs:var name="responseID1" expr="messageID+':1'" />
+						<!-- This answer is correct -->
+						<cs:var name="responseFollowup1" expr="true" />
+						<cs:var name="shortResponse1" expr="'Empathetic and honest'" />
+						<cs:var name="longResponse1"
+							expr="'The public will not respond well if information is withheld, people want to know the truth and what they can do to help their situation.'" />
+						<cs:var name="responseID2" expr="messageID+':2'" />
+						<cs:var name="responseFollowup2" expr="true" />
+						<cs:var name="shortResponse2" expr="'Calm, yet with all due concern'" />
+						<cs:var name="longResponse2" expr="'Staying calm will keep the public calm.'" />
+						<cs:var name="responseID3" expr="messageID+':3'" />
+						<cs:var name="responseFollowup3" expr="true" />
+						<cs:var name="shortResponse3"
+							expr="'Efficient (only the facts) yet reassuring'" />
+						<cs:var name="longResponse3"
+							expr="'It is best to relay only the most crucial information. Saying something that turns out to be wrong will impact public trust in us.'" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+						target="JIC_assistant:askCommunicationStrategy">
+						<assign name="briefingTone" expr="'confident'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+						target="JIC_assistant:askCommunicationStrategy">
+						<assign name="briefingTone" expr="'honest'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+						target="JIC_assistant:askCommunicationStrategy">
+						<assign name="briefingTone" expr="'calm'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID3"
+						target="JIC_assistant:askCommunicationStrategy">
+						<assign name="briefingTone" expr="'efficient'" />
+					</transition>
+				</state>
+
+				<state id="JIC_assistant:askCommunicationStrategy">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'Comms'" />
+						<cs:var name="messageType" expr="'question'" />
+						<cs:var name="messageSummary" expr="'evolving situation'" />
+						<cs:var name="messageText"
+							expr="'Since this is an evolving situation, and not all information is known right now, which is the best communication strategy to the public?'" />
+						<cs:var name="numResponses" expr="4" />
+						<cs:var name="responseID0" expr="messageID+':0'" />
+						<cs:var name="responseFollowup0" expr="true" />
+						<cs:var name="shortResponse0" expr="'Only the basics'" />
+						<cs:var name="longResponse0"
+							expr="'Give the public the most crucial information only, (such as where to pick up antibiotics).  You don'+dm.getApostrophe()+'t want to mislead them.'" />
+						<cs:var name="responseID1" expr="messageID+':1'" />
+						<cs:var name="responseFollowup1" expr="true" />
+						<cs:var name="shortResponse1" expr="'Get to a hospital quickly'" />
+						<cs:var name="longResponse1"
+							expr="'People feeling ill should get to a hospital quickly since the plume may be larger than we realize. It is better to be safe than sorry.'" />
+						<cs:var name="responseID2" expr="messageID+':2'" />
+						<!-- This answer is correct -->
+						<cs:var name="responseFollowup2" expr="true" />
+						<cs:var name="shortResponse2" expr="'Transparency'" />
+						<cs:var name="longResponse2"
+							expr="'State the details that are known yet acknowledge there are still things we don'+dm.getApostrophe()+'t know yet.  Say what is being done to get more information and promise to give frequent updates.'" />
+						<cs:var name="responseID3" expr="messageID+':3'" />
+						<cs:var name="responseFollowup3" expr="true" />
+						<cs:var name="shortResponse3" expr="'Reassurance'" />
+						<cs:var name="longResponse3"
+							expr="'Explain that many details are still unknown, but as long as people shelter in place and follow further instructions they will be alright.'" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+						target="JIC_assistant:askProtectiveHealthMeasures">
+						<assign name="briefingContent" expr="'basics'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+						target="JIC_assistant:askProtectiveHealthMeasures">
+						<assign name="briefingContent" expr="'hospital'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+						target="JIC_assistant:askProtectiveHealthMeasures">
+						<assign name="briefingContent" expr="'transparent'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID3"
+						target="JIC_assistant:askProtectiveHealthMeasures">
+						<assign name="briefingContent" expr="'reassuring'" />
+					</transition>
+				</state>
+
+				<state id="JIC_assistant:askProtectiveHealthMeasures">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'Comms'" />
+						<cs:var name="messageType" expr="'question'" />
+						<cs:var name="messageSummary" expr="'Protective health measures'" />
+						<cs:var name="messageText"
+							expr="'Which protective health measure below is the one you probably don'+dm.getApostrophe()+'t want to say?'" />
+						<cs:var name="numResponses" expr="4" />
+						<cs:var name="responseID0" expr="messageID+':0'" />
+						<cs:var name="responseFollowup0" expr="true" />
+						<cs:var name="shortResponse0" expr="'Shelter in place'" />
+						<cs:var name="longResponse0"
+							expr="'Citizens should shelter in place and wait for updates as more plume data is gathered.'" />
+						<cs:var name="responseID1" expr="messageID+':1'" />
+						<cs:var name="responseFollowup1" expr="true" />
+						<cs:var name="shortResponse1" expr="'POD information'" />
+						<cs:var name="longResponse1"
+							expr="'When and where PODs will open, and any other types of PODs (closed, business etc) as relevant.'" />
+						<cs:var name="responseID2" expr="messageID+':2'" />
+						<cs:var name="responseFollowup2" expr="true" />
+						<cs:var name="shortResponse2" expr="'Epidemiology and treatment'" />
+						<cs:var name="longResponse2"
+							expr="'Where cases have been confirmed, symptoms to look for, who to call, and where to go for treatment'" />
+						<cs:var name="responseID3" expr="messageID+':3'" />
+						<!-- This answer is correct -->
+						<cs:var name="responseFollowup3" expr="true" />
+						<cs:var name="shortResponse3" expr="'Get antibiotics from doctor'" />
+						<cs:var name="longResponse3"
+							expr="'Tell public it'+dm.getApostrophe()+'s is best to get to a health provider even if they feel slightly ill, since doctors can also distribute antibiotics.'" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+						target="JIC_assistant:askHowAddressTerrorism">
+						<assign name="healthMeasures" expr="'shelter'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+						target="JIC_assistant:askHowAddressTerrorism">
+						<assign name="healthMeasures" expr="'POD'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+						target="JIC_assistant:askHowAddressTerrorism">
+						<assign name="healthMeasures" expr="'epidemiology'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID3"
+						target="JIC_assistant:askHowAddressTerrorism">
+						<assign name="healthMeasures" expr="'doctor'" />
+					</transition>
+				</state>
+
+				<state id="JIC_assistant:askHowAddressTerrorism">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'Comms'" />
+						<cs:var name="messageType" expr="'question'" />
+						<cs:var name="messageSummary" expr="'Terrorism'" />
+						<cs:var name="messageText"
+							expr="'How should the possibility of terrorism be addressed to the public?'" />
+						<cs:var name="numResponses" expr="4" />
+						<cs:var name="responseID0" expr="messageID+':0'" />
+						<cs:var name="responseFollowup0" expr="true" />
+						<cs:var name="shortResponse0" expr="'Don'+dm.getApostrophe()+'t mention it'" />
+						<cs:var name="longResponse0"
+							expr="'Mentioning terrorism will worry the public and stir up chaos so it is best not to do it yet.'" />
+						<cs:var name="responseID1" expr="messageID+':1'" />
+						<!-- This answer is correct -->
+						<cs:var name="responseFollowup1" expr="true" />
+						<cs:var name="shortResponse1" expr="'It'+dm.getApostrophe()+'s a possibility'" />
+						<cs:var name="longResponse1"
+							expr="'Terrorism is a possibility and law enforcement entities are conducting an investigation, but it is too early to know.'" />
+						<cs:var name="responseID2" expr="messageID+':2'" />
+						<cs:var name="responseFollowup2" expr="true" />
+						<cs:var name="shortResponse2" expr="'It'+dm.getApostrophe()+'s likely'" />
+						<cs:var name="longResponse2"
+							expr="'Aerosolized anthrax in this country is almost unheard of, and therefore likely to be terrorism'" />
+						<cs:var name="responseID3" expr="messageID+':3'" />
+						<cs:var name="responseFollowup3" expr="true" />
+						<cs:var name="shortResponse3" expr="'Could mean antibiotic resistance'" />
+						<cs:var name="longResponse3"
+							expr="'If it is terrorism, there is a chance the strain may be resistant to traditional antibiotics.'" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+						target="JIC_assistant:askTerrorismNuance">
+						<assign name="addressTerrorism" expr="'ignore'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+						target="JIC_assistant:askTerrorismNuance">
+						<assign name="addressTerrorism" expr="'possibility'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+						target="JIC_assistant:askTerrorismNuance">
+						<assign name="addressTerrorism" expr="'likely'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID3"
+						target="JIC_assistant:askTerrorismNuance">
+						<assign name="addressTerrorism" expr="'resistance'" />
+					</transition>
+				</state>
+
+				<state id="JIC_assistant:askTerrorismNuance">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'Comms'" />
+						<cs:var name="messageType" expr="'question'" />
+						<cs:var name="messageSummary" expr="'Conclusion'" />
+						<cs:var name="messageText"
+							expr="'Which of following should NOT happen in the part of the brief addressing the possibility of terrorism?'" />
+						<cs:var name="numResponses" expr="4" />
+						<cs:var name="responseID0" expr="messageID+':0'" />
+						<cs:var name="responseFollowup0" expr="true" />
+						<cs:var name="shortResponse0" expr="'Patriotic tone'" />
+						<cs:var name="longResponse0" expr="'Protect national values.'" />
+						<cs:var name="responseID1" expr="messageID+':1'" />
+						<!-- This answer is correct -->
+						<cs:var name="responseFollowup1" expr="true" />
+						<cs:var name="shortResponse1" expr="'Reiterate dedication to transparency'" />
+						<cs:var name="longResponse1"
+							expr="'Build trust by once again promising the public a transparent communication process.'" />
+						<cs:var name="responseID2" expr="messageID+':2'" />
+						<cs:var name="responseFollowup2" expr="true" />
+						<cs:var name="shortResponse2" expr="'Other cities possibly affected'" />
+						<cs:var name="longResponse2"
+							expr="'Gently explain that if this turns out to be terrorism, other cities may have also been hit'" />
+						<cs:var name="responseID3" expr="messageID+':3'" />
+						<cs:var name="responseFollowup3" expr="true" />
+						<cs:var name="shortResponse3" expr="'Acknowledge fears'" />
+						<cs:var name="longResponse3"
+							expr="'Acknowledge the public'+dm.getApostrophe()+'s fears and uncertainty, yet prepare for the possibility of difficult days ahead.'" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+						target="JIC_assistant:confirmBriefingWithDEOC">
+						<assign name="terrorismNuance" expr="'patriotic'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+						target="JIC_assistant:confirmBriefingWithDEOC">
+						<assign name="terrorismNuance" expr="'transparency'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+						target="JIC_assistant:confirmBriefingWithDEOC">
+						<assign name="terrorismNuance" expr="'multi-city attack'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID3"
+						target="JIC_assistant:confirmBriefingWithDEOC">
+						<assign name="terrorismNuance" expr="'acknowledge fears'" />
+					</transition>
+				</state>
+
+				<state id="JIC_assistant:confirmBriefingWithDEOC">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'Comms'" />
+						<cs:var name="messageType" expr="'notify'" />
+						<cs:var name="messageSummary" expr="'Briefing confirmed'" />
+						<cs:var name="messageText"
+							expr="'Thank you, now it is time to meet with the DEOC to review before sending to the public.'" />
+						<cs:var name="numResponses" expr="0" />
+						<cst:sendUserMessage />
+						<send event="'review.public.briefing'" target="'DEOC_assistant'"
+							targettype="'dm'" />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID" target="JIC_assistant:confirmBriefing">
+					</transition>
+				</state>
+
+				<state id="JIC_assistant:confirmBriefing">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'Comms'" />
+						<cs:var name="messageType" expr="'notify'" />
+						<cs:var name="messageSummary" expr="'Briefing confirmed'" />
+						<cs:var name="messageText"
+							expr="'Thank you, the briefing will be prepared and presented to the public.'" />
+						<cs:var name="numResponses" expr="0" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID" target="JIC_assistant:idle">
+					</transition>
+				</state>
+
+
+			</state>
+
+			<state id="JIC_assistant:respondToPublic" initial="JIC_assistant:informPublicQuestions">
+
+				<state id="JIC_assistant:informPublicQuestions">
+					<onentry>
+						<assign name="precedingUserMsg" expr="''" />
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'Comms'" />
+						<cs:var name="messageType" expr="'notify'" />
+						<cs:var name="messageSummary" expr="'Questions from public'" />
+						<cs:var name="messageText"
+							expr="'We are getting questions from the public that we will need to answer.'" />
+						<cs:var name="numResponses" expr="0" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID" target="JIC_assistant:reaerosolization">
+					</transition>
+				</state>
+
+				<state id="JIC_assistant:reaerosolization">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'Comms'" />
+						<cs:var name="messageType" expr="'question'" />
+						<cs:var name="messageSummary" expr="'Reaerosolization?'" />
+						<cs:var name="messageText" expr="'How big a threat is reaerosolization?'" />
+						<cs:var name="numResponses" expr="4" />
+						<cs:var name="responseID0" expr="messageID+':0'" />
+						<cs:var name="responseFollowup0" expr="true" />
+						<cs:var name="shortResponse0" expr="'No threat'" />
+						<cs:var name="longResponse0" expr="'Not a threat at all.'" />
+						<cs:var name="responseID1" expr="messageID+':1'" />
+						<cs:var name="responseFollowup1" expr="true" />
+						<cs:var name="shortResponse1" expr="'Big threat'" />
+						<cs:var name="longResponse1" expr="'A big threat.'" />
+						<cs:var name="responseID2" expr="messageID+':2'" />
+						<cs:var name="responseFollowup2" expr="true" />
+						<cs:var name="shortResponse2" expr="'More indoors than out'" />
+						<cs:var name="longResponse2" expr="'More of a threat indoors than outdoors.'" />
+						<cs:var name="responseID3" expr="messageID+':3'" />
+						<cs:var name="responseFollowup3" expr="true" />
+						<cs:var name="shortResponse3"
+							expr="'What'+dm.getApostrophe()+'s reaerosolization?'" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+						target="JIC_assistant:threatOver">
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+						target="JIC_assistant:threatOver">
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+						target="JIC_assistant:threatOver">
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID3"
+						target="JIC_assistant:reaerosolizationDefn">
+					</transition>
+				</state>
+
+				<state id="JIC_assistant:reaerosolizationDefn">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'Comms'" />
+						<cs:var name="messageType" expr="'notify'" />
+						<cs:var name="messageSummary" expr="'Reaerosolization explanation'" />
+						<cs:var name="messageText"
+							expr="'Reaerosolization is when agent particles that have deposited on surfaces become re-entrained and a potent aerosol threat again.  Victims were sickened even after weeks in the Sverdlovsk release.'" />
+						<cs:var name="numResponses" expr="0" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input" target="JIC_assistant:threatOver">
+					</transition>
+				</state>
+
+				<state id="JIC_assistant:threatOver">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'Comms'" />
+						<cs:var name="messageType" expr="'question'" />
+						<cs:var name="messageSummary" expr="'Threat over?'" />
+						<cs:var name="messageText"
+							expr="'A disturbing steady increase in people are developing symptoms. Is the threat really over?'" />
+						<cs:var name="numResponses" expr="3" />
+						<cs:var name="responseID0" expr="messageID+':0'" />
+						<cs:var name="responseFollowup0" expr="true" />
+						<cs:var name="shortResponse0" expr="'Take precautions'" />
+						<cs:var name="longResponse0"
+							expr="'More people are getting infected, so folks should shelter in place.'" />
+						<cs:var name="responseID1" expr="messageID+':1'" />
+						<cs:var name="responseFollowup1" expr="true" />
+						<cs:var name="shortResponse1" expr="'Threat of infection is over'" />
+						<cs:var name="longResponse1"
+							expr="'The people becoming symptomatic were all infected during the initial assault.  It'+dm.getApostrophe()+'s just their  immune system, or if they received a bigger dose, that makes them get sick sooner or later.'" />
+						<cs:var name="responseID2" expr="messageID+':2'" />
+						<cs:var name="responseFollowup2" expr="true" />
+						<cs:var name="shortResponse2" expr="'Hard to tell'" />
+						<cs:var name="longResponse2"
+							expr="'The increase in sickness probably signifies the differing incubation periods of people infected in the initial bio assault, rather than a continuing source of infection.  Still, perhaps it'+dm.getApostrophe()+'s not just that.  Hard to prove a negative.'" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID" target="JIC_assistant:govtInvestigation">
+					</transition>
+				</state>
+
+				<state id="JIC_assistant:govtInvestigation">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'Comms'" />
+						<cs:var name="messageType" expr="'question'" />
+						<cs:var name="messageSummary" expr="'What is Government doing?'" />
+						<cs:var name="messageText"
+							expr="'What is the Government doing to find the perpetrators?'" />
+						<cs:var name="numResponses" expr="5" />
+						<cs:var name="responseID0" expr="messageID+':0'" />
+						<cs:var name="shortResponse0" expr="'FBI investigating.'" />
+						<cs:var name="longResponse0"
+							expr="'The Government is launching an intense investigation led by the FBI.'" />
+						<cs:var name="responseID1" expr="messageID+':1'" />
+						<cs:var name="shortResponse1" expr="'Case could take years.'" />
+						<cs:var name="longResponse1"
+							expr="'It is very difficult to attribute a biological attack to any one source.  Amerithrax took years to solve.'" />
+						<cs:var name="responseID2" expr="messageID+':2'" />
+						<cs:var name="shortResponse2" expr="'Pentagon interested in investigation.'" />
+						<cs:var name="longResponse2"
+							expr="'The Pentagon is interested in the investigation because if there was foreign involvement, that could well be an act of war.'" />
+						<cs:var name="responseID3" expr="messageID+':3'" />
+						<cs:var name="shortResponse3" expr="'Epidemiologists are investigating'" />
+						<cs:var name="longResponse3"
+							expr="'Epidemiologists are investigating the outbreak along with law enforcement.'" />
+						<cs:var name="responseID4" expr="messageID+':4'" />
+						<cs:var name="shortResponse4" expr="'All of the above'" />
+						<cs:var name="longResponse4" expr="'All of the above.'" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID" target="JIC_assistant:idle">
+					</transition>
+				</state>
+			</state>
+
+
+			<!-- Triggered after Ops Chief has allocated RSS and POS resources. This 
+				message should come at the same time that DEOC and Ops Chief receive it, 
+				since they all meet to review this one. -->
+			<state id="JIC_assistant:reviewMayorBriefing">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'Comms'" />
+					<cs:var name="messageType" expr="'notify'" />
+					<cs:var name="messageSummary" expr="'Review Mayor Briefing'" />
+					<cs:var name="messageText"
+						expr="'It is time to meet with your DEOC and Ops Chief to review the Mayor'+dm.getApostrophe()+'s briefing. Use the information from the public briefing, but also include resource allocations and requests. '" />
+					<cs:var name="numResponses" expr="0" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID" target="JIC_assistant:idle">
+				</transition>
+			</state>
+
+
+			<state id="JIC_assistant:respondToPublicFollowup" initial="JIC_assistant:informPublicQuestionsFollowup">
+
+				<state id="JIC_assistant:informPublicQuestionsFollowup">
+					<onentry>
+						<assign name="precedingUserMsg" expr="''" />
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'Comms'" />
+						<cs:var name="messageType" expr="'notify'" />
+						<cs:var name="messageSummary" expr="'Questions from public'" />
+						<cs:var name="messageText"
+							expr="'We are getting more questions from the public that we will need to answer.'" />
+						<cs:var name="numResponses" expr="0" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID" target="JIC_assistant:publicQueries">
+					</transition>
+				</state>
+
+				<state id="JIC_assistant:publicQueries" initial="JIC_assistant:mayor">
+					<state id="JIC_assistant:mayor">
+						<onentry>
+							<assign name="precedingUserMsg" expr="''" />
+							<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+							<cs:var name="addressee" expr="'Comms'" />
+							<cs:var name="messageType" expr="'question'" />
+							<cs:var name="messageSummary" expr="'Will Mayor take antibiotics'" />
+							<cs:var name="messageText" expr="'Will the Mayor take the antibiotics?'" />
+							<cs:var name="numResponses" expr="5" />
+							<cs:var name="responseID0" expr="messageID+':0'" />
+							<cs:var name="responseFollowup0" expr="true" />
+							<cs:var name="shortResponse0" expr="'Yes of course.'" />
+							<cs:var name="longResponse0"
+								expr="'The mayor took antibiotics immediately when they arrived and is encouraging everyone to do the same.'" />
+							<cs:var name="responseID1" expr="messageID+':1'" />
+							<cs:var name="responseFollowup1" expr="true" />
+							<cs:var name="shortResponse1" expr="'He is waiting his turn'" />
+							<cs:var name="longResponse1"
+								expr="'The Mayor looks forward to taking the meds when it is his turn.'" />
+							<cs:var name="responseID2" expr="messageID+':2'" />
+							<cs:var name="responseFollowup2" expr="true" />
+							<cs:var name="shortResponse2" expr="'After the population is treated.'" />
+							<cs:var name="longResponse2"
+								expr="'The Mayor will wait to take his meds until everyone has had a chance to get them.'" />
+							<cs:var name="responseID3" expr="messageID+':3'" />
+							<cs:var name="responseFollowup3" expr="true" />
+							<cs:var name="shortResponse3"
+								expr="'He is waiting but his family has been treated.'" />
+							<cs:var name="longResponse3"
+								expr="'The Mayor will wait to take his meds, but he has already provided them to his family.'" />
+							<cs:var name="responseID4" expr="messageID+':4'" />
+              <cs:var name="responseFollowup4" expr="true" />
+							<cs:var name="shortResponse4" expr="'The Mayor is not available for comment'" />
+							<cs:var name="longResponse4"
+								expr="'The Mayor moved up his vacation plans and cannot be reached for comment.'" />
+							<cst:sendUserMessage />
+						</onentry>
+            <onexit>
+              <assign name="precedingUserMsg" expr="messageID" />
+            </onexit>
+            <transition event="user.input"
+              cond="_eventdata.getMessageID() eq messageID" target="JIC_assistant:headOfHousehold">
+            </transition>
+					</state>
+					
+					
+					<state id="JIC_assistant:headOfHousehold">
+          <onentry>
+            <cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+            <cs:var name="addressee" expr="'Comms'" />
+            <cs:var name="messageType" expr="'notify'" />
+            <cs:var name="messageSummary" expr="'Heads of Household'" />
+            <cs:var name="messageText"
+              expr="'Should we make physical presence at the POD a criteria for distribution, or should we tell heads of households to come pick it up while their family stays home?'" />
+            <cs:var name="numResponses" expr="2" />
+            <cs:var name="responseID0" expr="messageID+':0'" />
+              <cs:var name="responseFollowup0" expr="true" />
+            <cs:var name="shortResponse0"
+               expr="'All family members'" />
+            <cs:var name="longResponse0"
+               expr="'People should be present in order to get Cipro, since we want to make sure none of it gets wasted. Then they can start the dose right there on the spot.'"/>
+            <cs:var name="responseID1" expr="messageID+':1'" />
+            <cs:var name="responseFollowup1" expr="true" />
+            <cs:var name="shortResponse1" expr="'Heads of household'" />
+            <cs:var name="longResponse1"
+              expr="'Heads of household can come for their families.  Its good to maximize the number of people sheltering in place, and minimize congestion at the PODs.'" />
+            <cst:sendUserMessage />
+          </onentry>
+            <onexit>
+              <assign name="precedingUserMsg" expr="messageID" />
+            </onexit>
+            <transition event="user.input"
+              cond="_eventdata.getMessageID() eq messageID" target="JIC_assistant:children">
+            </transition>
+        </state>
+					
+
+					<state id="JIC_assistant:children">
+						<onentry>
+							<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+							<cs:var name="addressee" expr="'Comms'" />
+							<cs:var name="messageType" expr="'question'" />
+							<cs:var name="messageSummary" expr="'Treatment for children?'" />
+							<cs:var name="messageText" expr="'How should children be treated?'" />
+							<cs:var name="numResponses" expr="5" />
+							<cs:var name="responseID0" expr="messageID+':0'" />
+							<cs:var name="responseFollowup0" expr="true" />
+							<cs:var name="shortResponse0" expr="'Treat the same as an adult'" />
+							<cs:var name="longResponse0" expr="'Just treat them like you would an adult.'" />
+							<cs:var name="responseID1" expr="messageID+':1'" />
+							<cs:var name="responseFollowup1" expr="true" />
+							<cs:var name="shortResponse1" expr="'Break tablets for children'" />
+							<cs:var name="longResponse1"
+								expr="'Pediatric dosing is less, so please break the tablets before giving them to your children.'" />
+							<cs:var name="responseID2" expr="messageID+':2'" />
+							<cs:var name="responseFollowup2" expr="true" />
+							<cs:var name="shortResponse2" expr="'Check with a doctor'" />
+							<cs:var name="longResponse2"
+								expr="'Check with CDC or a doctor to discuss dosage by weight for kids.'" />
+							<cs:var name="responseID3" expr="messageID+':3'" />
+							<cs:var name="responseFollowup3" expr="true" />
+							<cs:var name="shortResponse3" expr="'Kids should take amoxicillin instead'" />
+							<cs:var name="longResponse3"
+								expr="'Taking Cipro or doxy can be a problem for kids, so ask for amoxicillin instead for them.'" />
+							<cs:var name="responseID4" expr="messageID+':4'" />
+							<cs:var name="responseFollowup4" expr="true" />
+							<cs:var name="shortResponse4" expr="'Take the first medicine available.'" />
+							<cs:var name="longResponse4"
+								expr="'Even though Cipro and doxy can have some problems for kids, have them take the first medicine available to them.'" />
+							<cst:sendUserMessage />
+						</onentry>
+						<onexit>
+							<assign name="precedingUserMsg" expr="messageID" />
+						</onexit>
+						<transition event="user.input"
+							cond="_eventdata.getMessageID() eq messageID" target="JIC_assistant:closedPODs">
+						</transition>
+					</state>
+
+					<state id="JIC_assistant:closedPODs">
+						<onentry>
+							<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+							<cs:var name="addressee" expr="'Comms'" />
+							<cs:var name="messageType" expr="'question'" />
+							<cs:var name="messageSummary" expr="'Why closed PODs?'" />
+							<cs:var name="messageText"
+								expr="'Why are some of the PODs closed to the general public?'" />
+							<cs:var name="numResponses" expr="5" />
+							<cs:var name="responseID0" expr="messageID+':0'" />
+							<cs:var name="responseFollowup0" expr="true" />
+							<cs:var name="shortResponse0" expr="'Deserve special treatment'" />
+							<cs:var name="longResponse0"
+								expr="'Certain populations deserve special treatment.'" />
+							<cs:var name="responseID1" expr="messageID+':1'" />
+							<cs:var name="responseFollowup1" expr="true" />
+							<cs:var name="shortResponse1" expr="'Populations with special needs'" />
+							<cs:var name="longResponse1"
+								expr="'Certain populations have special needs that can best be served by using PODs that are closed to others.'" />
+							<cs:var name="responseID2" expr="messageID+':2'" />
+							<cs:var name="responseFollowup2" expr="true" />
+							<cs:var name="shortResponse2" expr="'Leverage organizational capabilities'" />
+							<cs:var name="longResponse2"
+								expr="'Certain populations have clearly demonstrated organizational capabilities that can be leveraged effectively by providing them their own meds for internal distribution.'" />
+							<cs:var name="responseID3" expr="messageID+':3'" />
+							<cs:var name="responseFollowup3" expr="true" />
+							<cs:var name="shortResponse3" expr="'More efficient for certain populations'" />
+							<cs:var name="longResponse3"
+								expr="'Certain populations can more efficiently be served using closed PODs.'" />
+							<cs:var name="responseID4" expr="messageID+':4'" />
+							<cs:var name="responseFollowup4" expr="true" />
+							<cs:var name="shortResponse4"
+								expr="'Do you really begrudge meds for nursing homes?'" />
+							<cs:var name="longResponse4"
+								expr="'Do you really begrudge the nursing home getting its own meds for seniors?'" />
+							<cst:sendUserMessage />
+						</onentry>
+						<onexit>
+							<assign name="precedingUserMsg" expr="messageID" />
+						</onexit>
+						<transition event="user.input"
+							cond="_eventdata.getMessageID() eq messageID" target="JIC_assistant:EUAdrugs">
+						</transition>
+					</state>
+
+					<state id="JIC_assistant:EUAdrugs">
+						<onentry>
+							<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+							<cs:var name="addressee" expr="'Comms'" />
+							<cs:var name="messageType" expr="'question'" />
+							<cs:var name="messageSummary" expr="'Why Emergency Use Authorization drugs?'" />
+							<cs:var name="messageText"
+								expr="'Why are we using Emergency Use Authorization drugs rather than approved drugs?'" />
+							<cs:var name="numResponses" expr="5" />
+							<cs:var name="responseID0" expr="messageID+':0'" />
+							<cs:var name="shortResponse0" expr="'Didn'+dm.getApostrophe()+'t plan well'" />
+							<cs:var name="longResponse0"
+								expr="'We didn'+dm.getApostrophe()+'t think about this in a timely fashion, but the people involved have been appropriately disciplined.'" />
+							<cs:var name="responseID1" expr="messageID+':1'" />
+							<cs:var name="shortResponse1"
+								expr="'Drug companies don'+dm.getApostrophe()+'t make the right meds'" />
+							<cs:var name="longResponse1"
+								expr="'Thank God, some of these bioterrorism diseases are quite rare in nature, so the drug companies didn'+dm.getApostrophe()+'t make the right meds for them.'" />
+							<cs:var name="responseID2" expr="messageID+':2'" />
+							<cs:var name="shortResponse2"
+								expr="'Drugs are appropriate but not yet fully tested'" />
+							<cs:var name="longResponse2"
+								expr="'FDA has done some testing of these drugs. They should be safe and effective, but we have not gone through the entire testing procedure.'" />
+							<cs:var name="responseID3" expr="messageID+':3'" />
+							<cs:var name="shortResponse3" expr="'Off-label use is recommended by experts'" />
+							<cs:var name="longResponse3"
+								expr="'These drugs are FDA-approved, but not for this particular indication. We are using them off-label, but our experts think they will work just fine.'" />
+							<cs:var name="responseID4" expr="messageID+':4'" />
+							<cs:var name="shortResponse4"
+								expr="'This is the best we can do in an emergency'" />
+							<cs:var name="longResponse4"
+								expr="'This is an emergency, and we are supplying the best drugs we can.'" />
+							<cst:sendUserMessage />
+						</onentry>
+						<onexit>
+							<assign name="precedingUserMsg" expr="messageID" />
+						</onexit>
+						<transition event="user.input"
+							cond="_eventdata.getMessageID() eq messageID" target="JIC_assistant:idle">
+						</transition>
+					</state>
+
+				</state>
+
+
+			</state>
+
+			<state id="JIC_assistant:infoBriefing">
+			</state>
+
+
+			<state id="JIC_assistant:bioagentCocktail">
+				<onentry>
+					<assign name="precedingUserMsg" expr="''" />
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'Comms'" />
+					<cs:var name="messageType" expr="'inform'" />
+					<cs:var name="messageSummary" expr="'Bioagent rumor'" />
+					<cs:var name="messageText"
+						expr="'There is a rumor that the bioagent is actually a cocktail of a potent virus in addition to the anthrax. You will develop a briefing to address these concerns.'" />
+					<cs:var name="numResponses" expr="5" />
+					<cs:var name="responseID0" expr="messageID+':0'" />
+					<cs:var name="responseFollowup0" expr="true" />
+					<cs:var name="shortResponse0" expr="'Rumors are false'" />
+					<cs:var name="longResponse0"
+						expr="'The rumors are not true. Don'+dm.getApostrophe()+'t worry about it.'" />
+					<cs:var name="responseID1" expr="messageID+':1'" />
+					<cs:var name="responseFollowup1" expr="true" />
+					<cs:var name="shortResponse1" expr="'Unlikely, but we are looking into it'" />
+					<cs:var name="longResponse1"
+						expr="'It'+dm.getApostrophe()+'s very unlikely that the bioagent used in the attack is a mixture of a deadly virus as well as anthrax. However, we are looking at it clinically, and will make an announcement if it proves to be true.'" />
+					<cs:var name="responseID2" expr="messageID+':2'" />
+					<cs:var name="responseFollowup2" expr="true" />
+					<cs:var name="shortResponse2" expr="'Act as if it were true'" />
+					<cs:var name="longResponse2"
+						expr="'People should take all precautions as though it were true, and we'+dm.getApostrophe()+'ll tell you if that'+dm.getApostrophe()+'s no longer required'" />
+					<cs:var name="responseID3" expr="messageID+':3'" />
+					<cs:var name="responseFollowup3" expr="true" />
+					<cs:var name="shortResponse3"
+						expr="'Avoid contact with people from affected area'" />
+					<cs:var name="longResponse3"
+						expr="'Self-evacuees from the attack region should be kept at arms length by receiving communities until it is proven that they are not contagious with some germ in addition to the anthrax.'" />
+					<cs:var name="responseID4" expr="messageID+':4'" />
+					<cs:var name="responseFollowup4" expr="true" />
+					<cs:var name="shortResponse4" expr="'It'+dm.getApostrophe()+'s probably not true'" />
+					<cs:var name="longResponse4"
+						expr="'People shouldn'+dm.getApostrophe()+'t discriminate against self-evacuees from the attack site, because it'+dm.getApostrophe()+'s probably nothing.'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID" target="JIC_assistant:idle">
+				</transition>
+			</state>
+
+			<state id="JIC_assistant:fakeCipro">
+				<onentry>
+					<assign name="precedingUserMsg" expr="''" />
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'Comms'" />
+					<cs:var name="messageType" expr="'inform'" />
+					<cs:var name="messageSummary" expr="'Fake Cipro'" />
+					<cs:var name="messageText"
+						expr="'Scammers are selling fake cipro. What should we do about it?'" />
+					<cs:var name="numResponses" expr="2" />
+					<cs:var name="responseID0" expr="messageID+':1'" />
+					<cs:var name="shortResponse0"
+						expr="'There'+dm.getApostrophe()+'s nothing we can do'" />
+					<cs:var name="longResponse0"
+						expr="'We can'+dm.getApostrophe()+'t do anything about this so we should ignore it.'" />
+					<cs:var name="responseID1" expr="messageID+':1'" />
+					<cs:var name="shortResponse1" expr="'Send law enforcement'" />
+					<cs:var name="longResponse1"
+						expr="'Divert additional law enforcement support to the affected areas'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID" target="JIC_assistant:idle">
+				</transition>
+			</state>
+		</state>
+	</parallel>
+</scxml>
+

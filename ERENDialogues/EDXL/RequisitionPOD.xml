@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequisitionResource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg 
+  EDXL-RMRequisitionResource.xsd"
+    xmlns="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+    xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+ xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3"
+    xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3" xmlns:xal="urn:oasis:names:tc:ciq:xal:3"
+    xmlns:geo-oasis="urn:oasis:names:tc:emergency:EDXL:HAVE:1.0:geo-oasis"
+	xmlns:gml="http://www.opengis.net/gml">
+	<MessageID>urn:au-qld-eoc:987654</MessageID>
+	<SentDateTime>2006-03-21T12:39:00+10:00</SentDateTime>
+	<MessageContentType>RequisitionResource</MessageContentType>
+	<OriginatingMessageID>urn:au-qld-eoc:12332</OriginatingMessageID>
+	<IncidentInformation>
+		<rm:IncidentDescription>Anthrax Release</rm:IncidentDescription>
+	</IncidentInformation>
+	<Funding>
+		<rm:FundCode>EREN</rm:FundCode>
+	</Funding>
+	<ContactInformation>
+		<rm:ContactRole>Requester</rm:ContactRole>
+		<rm:AdditionalContactInformation>
+      <xpil:PartyName>
+				<xnl:PersonName>
+					<xnl:NameElement xnl:ElementType="FirstName">John</xnl:NameElement>
+					<xnl:NameElement xnl:ElementType="LastName">Smith</xnl:NameElement>
+				</xnl:PersonName>
+				<xnl:OrganisationName>
+					<xnl:NameElement>Norfolk EOC</xnl:NameElement>
+				</xnl:OrganisationName>
+			</xpil:PartyName>
+			<xpil:Occupations>
+				<xpil:Occupation>
+					<xpil:OccupationElement xpil:Type="Role">Unified
+						Commander</xpil:OccupationElement>
+				</xpil:Occupation>
+			</xpil:Occupations>
+		</rm:AdditionalContactInformation>
+	</ContactInformation>
+	<ContactInformation>
+		<rm:ContactRole>Approver</rm:ContactRole>
+		<rm:AdditionalContactInformation>
+			<xpil:PartyName>
+				<xnl:PersonName>
+					<xnl:NameElement xnl:ElementType="FirstName">Jane</xnl:NameElement>
+					<xnl:NameElement xnl:ElementType="LastName">Doe</xnl:NameElement>
+				</xnl:PersonName>
+				<xnl:OrganisationName>
+					<xnl:NameElement>Norfolk Naval Shipyard</xnl:NameElement>
+				</xnl:OrganisationName>
+			</xpil:PartyName>
+			<xpil:Occupations>
+				<xpil:Occupation>
+					<xpil:OccupationElement xpil:Type="Role">Facility
+						Manager</xpil:OccupationElement>
+				</xpil:Occupation>
+			</xpil:Occupations>
+		</rm:AdditionalContactInformation>
+	</ContactInformation>
+
+	<ResourceInformation>
+    <ResourceInfoElementID>001</ResourceInfoElementID>
+		<Resource>
+			<ResourceID>POD_03</ResourceID>
+			<Name>Norfolk Naval Shipyard</Name>
+			<TypeStructure>
+				<rm:ValueListURN>urn:x-hazard:vocab:resourceTypes</rm:ValueListURN>
+				<rm:Value>Point of Distribution</rm:Value>
+			</TypeStructure>
+			<Description>A facility to be used to distribute medications to the population</Description>
+		</Resource>
+		<AssignmentInformation>
+			<Quantity>
+			<rm:MeasuredQuantity>
+          <rm:Amount>1</rm:Amount>
+        </rm:MeasuredQuantity>
+        </Quantity>
+		</AssignmentInformation>
+		<ScheduleInformation>
+			<ScheduleType>RequestedArrival</ScheduleType>
+			<DateTime>2006-03-25T09:30:00+10:00</DateTime>
+			<Location>
+				<rm:TargetArea>
+					<gml:Point>
+						<gml:pos>36.815278 -76.297222</gml:pos>
+					</gml:Point>
+				</rm:TargetArea>
+			</Location>
+		</ScheduleInformation>
+		
+	</ResourceInformation>
+
+</RequisitionResource>

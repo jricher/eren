@@ -1,0 +1,85 @@
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0"
+  xmlns:cs="http://commons.apache.org/scxml" xmlns:cst="urn:mitre:eren:dlg:custom:1.0"
+  xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:eren="urn:mitre:eren:1.0"
+  xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3"
+  xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+  xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+  xmlns:xi="http://www.w3.org/2001/XInclude" 
+  id="HamptonDEOC" initialstate="HamptonDEOC:waitForStart" >
+
+
+  <state id="HamptonDEOC:waitForStart">
+    <onentry>
+      <cs:var name="precedingUserMsg" expr="''" />
+      <cs:var name="precedingRsrcMsg" expr="''" />
+      <cs:var name="originatingRsrcMsg" expr="''" />
+    </onentry>
+
+    <transition event="request.emac" target="HamptonDEOC:contacted" />  
+  </state> 
+  
+  <state id="HamptonDEOC:contacted">
+    <onentry>
+      <assign name="precedingUserMsg" expr="''"/>
+      <cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+      <cs:var name="addressee" expr="'EOCdir'"/>
+      <cs:var name="messageType" expr="'inform'" />
+      <cs:var name="messageSummary" expr="'Greetings'" />
+      <cs:var name="messageText" expr="'Hello, I hear you are dealing with a situation over there in Norfolk.'" />
+      <cs:var name="numResponses" expr="1"/>
+      <cs:var name="responseID0" expr="messageID+':0'"/>
+      <cs:var name="responseFollowup0" expr="true" />
+      <cs:var name="shortResponse0" expr="'Request EMAC support'" />
+      <cs:var name="longResponse0" expr="'Yes, we seem to have an outbreak of anthrax. I would like to ask you to send over some equipment and resources to help us out here.'" />
+      <cst:sendUserMessage />
+    </onentry>
+    <onexit>
+      <assign name="precedingUserMsg" expr="messageID"/>
+    </onexit>
+    <transition event="user.input"
+      cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+      target="HamptonDEOC:informCommit">
+    </transition>
+  </state>
+  
+  <state id="HamptonDEOC:informCommit">
+      <onentry>
+      <cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+      <cs:var name="addressee" expr="'EOCdir'"/>
+      <cs:var name="messageType" expr="'inform'" />
+      <cs:var name="messageSummary" expr="'Agree to send resources'" />
+      <cs:var name="messageText" expr="'Ok, I can send you some PPE equipment that we'+dm.getApostrophe()+'ve been holding on to.'" />
+      <cs:var name="numResponses" expr="1"/>
+      <cs:var name="responseID0" expr="messageID+':0'"/>
+      <cs:var name="shortResponse0" expr="'Thanks'" />
+      <cs:var name="longResponse0" expr="'That'+dm.getApostrophe()+'s great. If you can send anything else over, please get in touch.'" />
+      <cst:sendUserMessage />
+    </onentry>
+    <onexit>
+      <assign name="precedingUserMsg" expr="messageID"/>
+    </onexit>
+    <transition target="HamptonDEOC:commitResources">
+    </transition>
+  </state>
+  
+  <state id="HamptonDEOC:commitResources">
+    <onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+      xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+      xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+      xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+      <cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+      <cs:var name="messageType" expr="'commit.resource'"/>
+      <cs:var name="resourceName" expr="'assorted masks and gloves'" />
+      <cs:var name="resourceTypeValue" expr="'PPE'" />
+      <cs:var name="scheduleType" expr="'Committed'"/>
+      <cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+      <cs:var name="locationDescription" expr="'RSS_01'" />
+      <cst:sendResourceMessage />
+    </onentry>
+    <transition target="HamptonDEOC:idle"/>
+  </state>
+  
+  <state id="HamptonDEOC:idle">
+  </state>
+  
+</scxml>

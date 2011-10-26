@@ -1,0 +1,36 @@
+<kml xmlns='http://earth.google.com/kml/2.2'
+xmlns:gx='http://www.google.com/kml/ext/2.2' xmlns:atom='http://
+www.w3.org/2005/Atom'>
+	<Document>
+		<name>Zipcode 23708</name>
+		<Style id="blue_zipcode">
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+				</Icon>
+				<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+			</IconStyle>
+			<LineStyle>
+				<color>ffff4613</color>
+			</LineStyle>
+			<PolyStyle>
+				<color>7fffaa00</color>
+			</PolyStyle>
+		</Style>
+		<Placemark>
+			<name>Zipcode 23708</name>
+			<styleUrl>#blue_zipcode</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<outerBoundaryIs>
+					<LinearRing>
+						<coordinates>
+							-76.31434633190231,36.84826764965984,0 -76.31318929687031,36.84631785098294,0 -76.31062576379213,36.8464218596523,0 -76.30985222553939,36.84293451649924,0 -76.30639160004063,36.84252729231358,0 -76.30344465194018,36.84324852909704,0 -76.30280507468376,36.84448066950368,0 -76.30267994703975,36.84725089190076,0 -76.3028095061006,36.84848190735878,0 -76.30396346839595,36.84868603750176,0 -76.30716711076497,36.84786192105916,0 -76.31511616603966,36.84867765985728,0 -76.31434633190231,36.84826764965984,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+	</Document>
+</kml>

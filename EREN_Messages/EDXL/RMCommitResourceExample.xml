@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<CommitResource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg 
+  EDXL-RMCommitResource.xsd"
+    xmlns="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+    xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+ xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3"
+    xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3" xmlns:xal="urn:oasis:names:tc:ciq:xal:3"
+    xmlns:geo-oasis="urn:oasis:names:tc:emergency:EDXL:HAVE:1.0:geo-oasis"
+ xmlns:gml="http://www.opengis.net/gml">
+  <MessageID>urn:au-qld-eoc:997754</MessageID>
+  <SentDateTime>2006-03-21T12:46:00+10:00</SentDateTime>
+  <MessageContentType>CommitResource</MessageContentType>
+  <OriginatingMessageID>urn:au-qld-eoc:12332</OriginatingMessageID>
+  <PrecedingMessageID>urn:au-qld-eoc:987654</PrecedingMessageID>
+  <IncidentInformation>
+    <rm:IncidentDescription>Cyclone Larry</rm:IncidentDescription>
+  </IncidentInformation>
+  <Funding>
+    <rm:FundCode>HP4347</rm:FundCode>
+  </Funding>
+  <ContactInformation>
+    <rm:ContactRole>Sender</rm:ContactRole>
+    <rm:AdditionalContactInformation>
+      <xpil:PartyName>
+        <xnl:PersonName>
+          <xnl:NameElement xnl:ElementType="FirstName">Charlotte</xnl:NameElement>
+          <xnl:NameElement xnl:ElementType="LastName">Ryan</xnl:NameElement>
+        </xnl:PersonName>
+        <xnl:OrganisationName>
+          <xnl:NameElement>EMA</xnl:NameElement>
+        </xnl:OrganisationName>
+      </xpil:PartyName>
+    </rm:AdditionalContactInformation>
+  </ContactInformation>
+  <ResourceInformation>
+    <ResourceInfoElementID>001</ResourceInfoElementID>
+    <ResponseInformation>
+      <rm:PrecedingResourceInfoElementID>001</rm:PrecedingResourceInfoElementID>
+      <rm:ResponseType>Accept</rm:ResponseType>
+    </ResponseInformation>
+    <Resource>
+      <TypeStructure>
+        <rm:ValueListURN>urn:x-hazard:vocab:resourceTypes</rm:ValueListURN>
+        <rm:Value>Small Animal Sheltering Team</rm:Value>
+      </TypeStructure>
+      <Description>
+        5-person response team to advise and support local efforts to set up a
+        small animal shelter
+      </Description>
+      <SpecialRequirements>A qualified veterinary surgeon</SpecialRequirements>
+    </Resource>
+    <AssignmentInformation>
+      <Quantity>
+        <rm:MeasuredQuantity>
+          <rm:Amount>1</rm:Amount>
+        </rm:MeasuredQuantity>
+      </Quantity>
+    </AssignmentInformation>
+    <ScheduleInformation>
+      <ScheduleType>Committed</ScheduleType>
+      <DateTime>2006-03-21T12:46:00+10:00</DateTime>
+    </ScheduleInformation>
+  </ResourceInformation>
+  <ResourceInformation>
+    <ResourceInfoElementID>002</ResourceInfoElementID>
+    <ResponseInformation>
+      <rm:PrecedingResourceInfoElementID>002</rm:PrecedingResourceInfoElementID>
+      <rm:ResponseType>Decline</rm:ResponseType>
+    </ResponseInformation>
+  </ResourceInformation>
+</CommitResource>

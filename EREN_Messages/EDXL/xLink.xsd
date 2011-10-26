@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by Ram Kumar -->
+<!--This schema is a definition of xLink attributes that can be used for linking and referencing Parties, Party Names and Addresses.-->
+<!--See http://www.w3.org/XML/Linking for more information on xLink-->
+<!--Copyright 2005 OASIS CIQ TC-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xlink="http://www.w3.org/1999/xlink" targetNamespace="http://www.w3.org/1999/xlink" elementFormDefault="qualified" attributeFormDefault="qualified">
+	<xsd:annotation>
+		<xsd:documentation> 
+		Specification Name: OASIS CIQ TC - xLink
+		Description: Defines the W3C schema for establishing links between entities
+		Produced by: OASIS Customer Information Quality Technical Committee
+		Version: 3.0  
+		Status: Public Review Draft
+		Copyright: W3C/OASIS
+		Last Modified: 05 April 2006
+		Last Modified by: Ram Kumar 
+		NOTE: Do not modify this schema as it will break specifications compatibility 
+		</xsd:documentation>
+	</xsd:annotation>
+	<xsd:attributeGroup name="grLocator">
+		<xsd:annotation>
+			<xsd:documentation>Defines a set of attributes for an element of type LOCATOR</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="type" fixed="locator">
+			<xsd:annotation>
+				<xsd:documentation>Indicates this a xLink 'locator' element</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="href" type="xsd:anyURI">
+			<xsd:annotation>
+				<xsd:documentation>Identifies the remote resource or its location. E.g. a full URL to the resource or a #some_id for local resources with xml:id attribute.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+	<xsd:attributeGroup name="grResource">
+		<xsd:annotation>
+			<xsd:documentation>Defines a set of attributes for an element of type RESOURCE</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="type" fixed="resource">
+			<xsd:annotation>
+				<xsd:documentation>Indicates this a xLink 'resource' element</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="label" type="xsd:NMTOKEN">
+			<xsd:annotation>
+				<xsd:documentation>An identifier of an element of type 'resource' or 'locator'. The identifier is used by xlink:from and xlink:to</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+	<xsd:attributeGroup name="grLocatorOrResource">
+		<xsd:annotation>
+			<xsd:documentation>Defines a set of attributes for an element of type LOCATOR (href is required) or RESOURCE (href is ignored)</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="type">
+			<xsd:annotation>
+				<xsd:documentation>Indicates the type of the element for linking purposes as per the enumeration.</xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:NMTOKEN">
+					<xsd:enumeration value="locator"/>
+					<xsd:enumeration value="resource"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="label" type="xsd:NMTOKEN">
+			<xsd:annotation>
+				<xsd:documentation>An identifier of an element of type 'resource' or 'locator'. The identifier is used by xlink:from and xlink:to</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="href" type="xsd:anyURI">
+			<xsd:annotation>
+				<xsd:documentation>Identifies the remote resource or its location. E.g. a full URL to the resource or a #some_id for local resources with xml:id attribute.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+	<xsd:attributeGroup name="grArc">
+		<xsd:annotation>
+			<xsd:documentation>Defines a set of attributes for an element of type ARC</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="type" fixed="arc">
+			<xsd:annotation>
+				<xsd:documentation>Indicates this is a xLink 'arc' element</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="arcrole" type="xsd:anyURI">
+			<xsd:annotation>
+				<xsd:documentation>Identifies the relationship type between elements referenced by FROM and TO.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="from" type="xsd:NMTOKEN">
+			<xsd:annotation>
+				<xsd:documentation>Points at an element of xlink:type='resource' or 'locator' from any namespace within the same addressable XML where xlink:label has a matching value</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="to" type="xsd:NMTOKEN">
+			<xsd:annotation>
+				<xsd:documentation>Points at an element of xlink:type='resource' or 'locator' from any namespace within the same addressable XML where xlink:label has a matching value</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="title" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation>A human-readable description of the relationship</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+</xsd:schema>

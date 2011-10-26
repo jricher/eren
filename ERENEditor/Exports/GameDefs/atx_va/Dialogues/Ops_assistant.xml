@@ -1,0 +1,779 @@
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0"
+	xmlns:cs="http://commons.apache.org/scxml" xmlns:cst="urn:mitre:eren:dlg:custom:1.0"
+	xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:eren="urn:mitre:eren:1.0"
+	xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+	xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg" xmlns:xi="http://www.w3.org/2001/XInclude"
+	id="Ops_assistant" initialstate="Ops_assistant:brain">
+
+
+
+	<parallel id="Ops_assistant:brain">
+
+		<onentry>
+			<cs:var name="precedingUserMsg" expr="''" />
+			<cs:var name="precedingRsrcMsg" expr="''" />
+			<cs:var name="originatingRsrcMsg" expr="''" />
+			<cs:var name="PodID" expr="''" />
+		</onentry>
+
+		<state id="Ops_assistant:attention" initial="Ops_assistant:attention:waiting">
+			<state id="Ops_assistant:attention:waiting">
+				<transition event="requisition.resource" target="Ops_assistant:attention:send">
+					<cst:eval
+						expr="dm.addNpcEvent(msgSrc,'requisition.resource',_eventdata)" />
+				</transition>
+				<transition event="done.requesting.pods" target="Ops_assistant:attention:send">
+				  <cst:eval expr="dm.addNpcEvent(msgSrc,'done.requesting.pods',null)" />
+				</transition>
+				<transition event="reject.rss.plan" target="Ops_assistant:attention:send">
+					<cst:eval expr="dm.addNpcEvent(msgSrc,'reject.rss.plan',null)" />
+				</transition>
+				<transition event="reject.pod.plan" target="Ops_assistant:attention:send">
+					<cst:eval expr="dm.addNpcEvent(msgSrc,'reject.pod.plan',_eventdata)" />
+				</transition>
+				<transition event="reject.usps.plan" target="Ops_assistant:attention:send">
+					<cst:eval expr="dm.addNpcEvent(msgSrc,'reject.usps.plan',null)" />
+				</transition>
+				<transition event="review.mayor.briefing" target="Ops_assistant:attention:send">
+					<cst:eval	expr="dm.addNpcEvent(msgSrc,'review.mayor.briefing',_eventdata)" />
+				</transition>
+			</state>
+
+			<state id="Ops_assistant:attention:send">
+				<transition target="Ops_assistant:attention:waiting">
+					<send event="'event.received'" />
+				</transition>
+			</state>
+		</state>
+
+
+		<state id="Ops_assistant:dialogues" initial="Ops_assistant:idle">
+
+			<state id="Ops_assistant:idle">
+				<onentry>
+					<cs:var name="savedEvent" expr="dm.getNpcEvent(msgSrc)" />
+				</onentry>
+
+				<transition event="patients.arrive"
+					target="Ops_assistant:allocateToRSS:askAllocation">
+				</transition>
+				<transition
+					cond="dm.getEventName(savedEvent).equals('requisition.resource')
+                      and savedEvent.getPayload().hasResourceType('POD')"
+					target="Ops_assistant:allocateToPod:askAllocation">
+					<assign name="PodID" expr="savedEvent.getPayload().getResourceID()" />
+				</transition>
+				<transition
+					cond="dm.getEventName(savedEvent).equals('requisition.resource')
+                            and savedEvent.getPayload().hasResourceType('USPS')"
+					target="Ops_assistant:allocateToUsps:askAllocation">
+				</transition>
+				<transition cond="dm.getEventName(savedEvent).equals('done.requesting.pods')"
+				  target="Ops_assistant:determineFedResourceNeeds">
+				  <send event="'done.allocating.pods'" target="'DEOC_assistant'"
+            targettype="'dm'" />
+				</transition>
+				<transition cond="dm.getEventName(savedEvent).equals('reject.rss.plan')"
+					target="Ops_assistant:RssRejected" />
+				<transition cond="dm.getEventName(savedEvent).equals('reject.pod.plan')"
+					target="Ops_assistant:PodRejected">
+					<assign name="PodID" expr="savedEvent.getPayload().PodID" />
+				</transition>
+				<transition
+					cond="dm.getEventName(savedEvent).equals('review.mayor.briefing')"
+					target="Ops_assistant:reviewMayorBriefing" />
+				<transition cond="dm.getEventName(savedEvent).equals('reject.usps.plan')"
+					target="Ops_assistant:UspsRejected">
+				</transition>
+				<transition event="event.received" target="Ops_assistant:gotEvent" />
+			</state>
+
+			<!-- Go back to idle so that the event can be read from the queue -->
+			<state id="Ops_assistant:gotEvent">
+				<transition target="Ops_assistant:idle" />
+			</state>
+
+			<state id="Ops_assistant:allocateToRSS:askAllocation">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'OpsChief'" />
+					<cs:var name="messageType" expr="'notify'" />
+					<cs:var name="messageSummary" expr="'Allocate RSS resources'" />
+					<cs:var name="messageText"
+						expr="'The EOC Director has requested Strategic National Stockpile medication from CDC.  We need to allocate resources to the RSS facility to break it down when it arrives.'" />
+					<cs:var name="messageLocation" expr="'RSS_01'" />
+					<cs:var name="numResponses" expr="0" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID" target="Ops_assistant:allocateToRSS">
+				</transition>
+			</state>
+
+
+			<state id="Ops_assistant:allocateToRSS" initial="Ops_assistant:allocateToRSS:askClinical">
+
+				<onentry>
+					<cs:var name="RSSclinical" expr="''" />
+					<cs:var name="RSSLE" expr="''" />
+					<cs:var name="RSSOps" expr="''" />
+				</onentry>
+
+				<state id="Ops_assistant:allocateToRSS:askClinical">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'OpsChief'" />
+						<cs:var name="messageType" expr="'question'" />
+						<cs:var name="messageLocation" expr="'RSS_01'" />
+						<cs:var name="messageSummary" expr="'Clinical staff?'" />
+						<cs:var name="messageText"
+							expr="'How many clinical staff would you like to send to the RSS facility?'" />
+						<cs:var name="numResponses" expr="3" />
+						<cs:var name="responseID0" expr="messageID+':0'" />
+						<cs:var name="responseFollowup0" expr="true" />
+						<cs:var name="shortResponse0" expr="'50'" />
+						<cs:var name="longResponse0"
+							expr="'Let'+dm.getApostrophe()+'s send fifty clinical staff'" />
+						<cs:var name="responseID1" expr="messageID+':1'" />
+						<cs:var name="responseFollowup1" expr="true" />
+						<cs:var name="shortResponse1" expr="'80'" />
+						<cs:var name="longResponse1"
+							expr="'Let'+dm.getApostrophe()+'s send eighty clinical staff'" />
+						<cs:var name="responseID2" expr="messageID+':2'" />
+						<cs:var name="responseFollowup2" expr="true" />
+						<cs:var name="shortResponse2" expr="'100'" />
+						<cs:var name="longResponse2"
+							expr="'Let'+dm.getApostrophe()+'s send one hundred clinical staff'" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+						target="Ops_assistant:allocateToRSS:askLE">
+						<assign name="RSSclinical" expr="'50'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+						target="Ops_assistant:allocateToRSS:askLE">
+						<assign name="RSSclinical" expr="'80'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+						target="Ops_assistant:allocateToRSS:askLE">
+						<assign name="RSSclinical" expr="'100'" />
+					</transition>
+				</state>
+
+
+				<state id="Ops_assistant:allocateToRSS:askLE">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'OpsChief'" />
+						<cs:var name="messageType" expr="'question'" />
+						<cs:var name="messageLocation" expr="'RSS_01'" />
+						<cs:var name="messageSummary" expr="'Law enforcement?'" />
+						<cs:var name="messageText"
+							expr="'How many law enforcement staff would you like to send to the RSS facility?'" />
+						<cs:var name="numResponses" expr="3" />
+						<cs:var name="responseID0" expr="messageID+':0'" />
+						<cs:var name="responseFollowup0" expr="true" />
+						<cs:var name="shortResponse0" expr="'80'" />
+						<cs:var name="longResponse0"
+							expr="'Let'+dm.getApostrophe()+'s send eighty law enforcement staff'" />
+						<cs:var name="responseID1" expr="messageID+':1'" />
+						<cs:var name="responseFollowup1" expr="true" />
+						<cs:var name="shortResponse1" expr="'150'" />
+						<cs:var name="longResponse1"
+							expr="'Let'+dm.getApostrophe()+'s send one hundred fifty law enforcement staff'" />
+						<cs:var name="responseID2" expr="messageID+':3'" />
+						<cs:var name="responseFollowup2" expr="true" />
+						<cs:var name="shortResponse2" expr="'100'" />
+						<cs:var name="longResponse2"
+							expr="'Let'+dm.getApostrophe()+'s send one hundred law enforcement staff'" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+						target="Ops_assistant:allocateToRSS:askOps">
+						<assign name="RSSLE" expr="'80'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+						target="Ops_assistant:allocateToRSS:askOps">
+						<assign name="RSSLE" expr="'100'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+						target="Ops_assistant:allocateToRSS:askOps">
+						<assign name="RSSLE" expr="'150'" />
+					</transition>
+				</state>
+
+
+				<state id="Ops_assistant:allocateToRSS:askOps">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'OpsChief'" />
+						<cs:var name="messageType" expr="'question'" />
+						<cs:var name="messageLocation" expr="'RSS_01'" />
+						<cs:var name="messageSummary" expr="'Operations staff?'" />
+						<cs:var name="messageText"
+							expr="'How many operational staff would you like to send to the RSS facility?'" />
+						<cs:var name="numResponses" expr="3" />
+						<cs:var name="responseID0" expr="messageID+':0'" />
+						<cs:var name="responseFollowup0" expr="true" />
+						<cs:var name="shortResponse0" expr="'150'" />
+						<cs:var name="longResponse0"
+							expr="'Let'+dm.getApostrophe()+'s send one hundred fifty operational staff'" />
+						<cs:var name="responseID1" expr="messageID+':1'" />
+						<cs:var name="responseFollowup1" expr="true" />
+						<cs:var name="shortResponse1" expr="'180'" />
+						<cs:var name="longResponse1"
+							expr="'Let'+dm.getApostrophe()+'s send one hundred eighty operational staff'" />
+						<cs:var name="responseID2" expr="messageID+':2'" />
+						<cs:var name="responseFollowup2" expr="true" />
+						<cs:var name="shortResponse2" expr="'200'" />
+						<cs:var name="longResponse2"
+							expr="'Let'+dm.getApostrophe()+'s send two hundred operational staff'" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+						target="Ops_assistant:allocateToRSS:confirm">
+						<assign name="RSSOps" expr="'150'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+						target="Ops_assistant:allocateToRSS:confirm">
+						<assign name="RSSOps" expr="'180'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+						target="Ops_assistant:allocateToRSS:confirm">
+						<assign name="RSSOps" expr="'200'" />
+					</transition>
+				</state>
+
+
+				<state id="Ops_assistant:allocateToRSS:confirm">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'OpsChief'" />
+						<cs:var name="messageType" expr="'notify'" />
+						<cs:var name="messageSummary" expr="'Confirm RSS allocation'" />
+						<cs:var name="messageText"
+							expr="'You have allocated resources to the RSS as follows: '+RSSclinical+' clinical staff, '+RSSLE+' law enforcement staff and '+RSSOps+' operational staff. I will forward this plan to the EOC director for approval.'" />
+						<cs:var name="numResponses" expr="0" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID" target="Ops_assistant:allocateToRSS:notifyDEOC" />
+				</state>
+
+				<state id="Ops_assistant:allocateToRSS:notifyDEOC">
+					<onentry>
+						<log label="Sending rss plan event" />
+						<send event="'rss.plan'" namelist="RSSclinical RSSLE RSSOps"
+							target="'DEOC_assistant'" targettype="'dm'" />
+					</onentry>
+					<transition target="Ops_assistant:allocateToRSS:done" />
+				</state>
+
+				<state id="Ops_assistant:allocateToRSS:done">
+					<transition target="Ops_assistant:idle" />
+				</state>
+
+			</state>
+
+
+			<state id="Ops_assistant:RssRejected">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'OpsChief'" />
+					<cs:var name="messageType" expr="'notify'" />
+					<cs:var name="messageSummary" expr="'RSS allocation rejected'" />
+					<cs:var name="messageText"
+						expr="'The EOC Director has rejected your RSS allocation plan. Please discuss with the EOC director and enter a new plan.'" />
+					<cs:var name="numResponses" expr="0" />
+					<!-- <cs:var name="responseID0" expr="messageID+':0'" /> -->
+					<!-- <cs:var name="responseFollowup0" expr="true" /> -->
+					<!-- <cs:var name="shortResponse0" expr="'Ok'" /> -->
+					<!-- <cs:var name="longResponse0" expr="'Ok'" /> -->
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID" target="Ops_assistant:allocateToRSS">
+				</transition>
+			</state>
+
+			<state id="Ops_assistant:allocateToPod:askAllocation">
+				<onentry>
+					<assign name="precedingUserMsg" expr="''" />
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'OpsChief'" />
+					<cs:var name="messageType" expr="'notify'" />
+					<cs:var name="messageSummary" expr="'Allocate POD resources'" />
+					<cs:var name="messageText"
+						expr="'We need to allocate resources to the POD at '+dm.getPodName(PodID)+'.'" />
+					<cs:var name="numResponses" expr="0" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID" target="Ops_assistant:allocateToPod">
+				</transition>
+			</state>
+
+			<state id="Ops_assistant:allocateToPod" initial="Ops_assistant:allocateToPod:askClinical">
+
+				<onentry>
+					<cs:var name="PodClinical" expr="''" />
+					<cs:var name="PodLE" expr="''" />
+					<cs:var name="PodOps" expr="''" />
+				</onentry>
+
+				<state id="Ops_assistant:allocateToPod:askClinical">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'OpsChief'" />
+						<cs:var name="messageType" expr="'question'" />
+						<cs:var name="messageSummary" expr="'Clinical staff?'" />
+						<cs:var name="messageText"
+							expr="'How many clinical staff would you like to send to '+dm.getPodName(PodID)+'?'" />
+						<cs:var name="numResponses" expr="3" />
+						<cs:var name="responseID0" expr="messageID+':0'" />
+						<cs:var name="responseFollowup0" expr="true" />
+						<cs:var name="shortResponse0" expr="'20'" />
+						<cs:var name="longResponse0"
+							expr="'Let'+dm.getApostrophe()+'s send twenty clinical staff (throughput: 200 people/hour)'" />
+						<cs:var name="responseID1" expr="messageID+':1'" />
+						<cs:var name="responseFollowup1" expr="true" />
+						<cs:var name="shortResponse1" expr="'55'" />
+						<cs:var name="longResponse1"
+							expr="'Let'+dm.getApostrophe()+'s send fifty five clinical staff (throughput: 500 people/hour)'" />
+						<cs:var name="responseID2" expr="messageID+':2'" />
+						<cs:var name="responseFollowup2" expr="true" />
+						<cs:var name="shortResponse2" expr="'100'" />
+						<cs:var name="longResponse2"
+							expr="'Let'+dm.getApostrophe()+'s send one hundred clinical staff (throughput: 1000 people/hour)'" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+						target="Ops_assistant:allocateToPod:askLE">
+						<assign name="PodClinical" expr="'20'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+						target="Ops_assistant:allocateToPod:askLE">
+						<assign name="PodClinical" expr="'55'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+						target="Ops_assistant:allocateToPod:askLE">
+						<assign name="PodClinical" expr="'100'" />
+					</transition>
+				</state>
+
+				<state id="Ops_assistant:allocateToPod:askLE">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'OpsChief'" />
+						<cs:var name="messageType" expr="'question'" />
+						<cs:var name="messageSummary" expr="'Law enforcement?'" />
+						<cs:var name="messageText"
+							expr="'How many law enforcement staff would you like to send to '+dm.getPodName(PodID)+'?'" />
+						<cs:var name="numResponses" expr="3" />
+						<cs:var name="responseID0" expr="messageID+':0'" />
+						<cs:var name="responseFollowup0" expr="true" />
+						<cs:var name="shortResponse0" expr="'40'" />
+						<cs:var name="longResponse0"
+							expr="'Let'+dm.getApostrophe()+'s send forty law enforcement staff'" />
+						<cs:var name="responseID1" expr="messageID+':1'" />
+						<cs:var name="responseFollowup1" expr="true" />
+						<cs:var name="shortResponse1" expr="'50'" />
+						<cs:var name="longResponse1"
+							expr="'Let'+dm.getApostrophe()+'s send fifty law enforcement staff'" />
+						<cs:var name="responseID2" expr="messageID+':2'" />
+						<cs:var name="responseFollowup2" expr="true" />
+						<cs:var name="shortResponse2" expr="'60'" />
+						<cs:var name="longResponse2"
+							expr="'Let'+dm.getApostrophe()+'s send sixty law enforcement staff'" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+						target="Ops_assistant:allocateToPod:askOps">
+						<assign name="PodLE" expr="'40'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+						target="Ops_assistant:allocateToPod:askOps">
+						<assign name="PodLE" expr="'50'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+						target="Ops_assistant:allocateToPod:askOps">
+						<assign name="PodLE" expr="'60'" />
+					</transition>
+				</state>
+
+
+				<state id="Ops_assistant:allocateToPod:askOps">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'OpsChief'" />
+						<cs:var name="messageType" expr="'question'" />
+						<cs:var name="messageSummary" expr="'Operations staff?'" />
+						<cs:var name="messageText"
+							expr="'How many operational staff would you like to send to '+dm.getPodName(PodID)+'?'" />
+						<cs:var name="numResponses" expr="3" />
+						<cs:var name="responseID0" expr="messageID+':0'" />
+						<cs:var name="responseFollowup0" expr="true" />
+						<cs:var name="shortResponse0" expr="'10'" />
+						<cs:var name="longResponse0"
+							expr="'Let'+dm.getApostrophe()+'s send ten operational staff'" />
+						<cs:var name="responseID1" expr="messageID+':1'" />
+						<cs:var name="responseFollowup1" expr="true" />
+						<cs:var name="shortResponse1" expr="'20'" />
+						<cs:var name="longResponse1"
+							expr="'Let'+dm.getApostrophe()+'s send twenty operational staff'" />
+						<cs:var name="responseID2" expr="messageID+':2'" />
+						<cs:var name="responseFollowup2" expr="true" />
+						<cs:var name="shortResponse2" expr="'30'" />
+						<cs:var name="longResponse2"
+							expr="'Let'+dm.getApostrophe()+'s send thirty operational staff'" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+						target="Ops_assistant:allocateToPod:confirm">
+						<assign name="PodOps" expr="'10'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+						target="Ops_assistant:allocateToPod:confirm">
+						<assign name="PodOps" expr="'20'" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+						target="Ops_assistant:allocateToPod:confirm">
+						<assign name="PodOps" expr="'30'" />
+					</transition>
+				</state>
+
+
+				<state id="Ops_assistant:allocateToPod:confirm">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'OpsChief'" />
+						<cs:var name="messageType" expr="'notify'" />
+						<cs:var name="messageSummary" expr="'Confirm POD allocation'" />
+						<cs:var name="messageText"
+							expr="'You have allocated resources to '+dm.getPodName(PodID)+' as follows: '+PodClinical+' clinical staff, '+PodLE+' law enforcement staff and '+PodOps+' operational staff. I will forward this plan to the EOC director for approval.'" />
+						<cs:var name="numResponses" expr="0" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+
+
+					<transition target="Ops_assistant:allocateToPod:notifyDEOC">
+					</transition>
+				</state>
+
+				<state id="Ops_assistant:allocateToPod:notifyDEOC">
+					<onentry>
+						<send event="'pod.plan'" namelist="PodID PodClinical PodLE PodOps"
+							target="'DEOC_assistant'" targettype="'dm'" />
+					</onentry>
+
+					<transition target="Ops_assistant:allocateToPod:done" />
+				</state>
+
+				<state id="Ops_assistant:allocateToPod:done">
+					<transition target="Ops_assistant:idle" />
+				</state>
+
+			</state>
+
+       <!--  This should happen after POD plan has been approved. -->  
+      <state id="Ops_assistant:determineFedResourceNeeds">
+          <onentry>
+            <cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+            <cs:var name="addressee" expr="'OpsChief'" />
+            <cs:var name="messageType" expr="'notify'" />
+            <cs:var name="messageSummary" expr="'Determine Federal resource needs'" />
+            <cs:var name="messageText" expr="'You should check estimates of resource needs, since these agencies can send things to help you: HHS (clinical and lab diagnostic staff), DHS (HazMat assistance, border and quarantine support, transportation and communications materials), and DOD (National Guard security, patient evacuation, stand-up medical units).'"/>
+            <cs:var name="numResponses" expr="0" />
+            <cst:sendUserMessage />
+          </onentry>
+          <onexit>
+            <assign name="precedingUserMsg" expr="messageID" />
+          </onexit>
+          <transition cond="_eventdata.getMessageID() eq messageID" 
+          target="Ops_assistant:assessAbsorptiveCapacity"/>
+      </state>
+      
+       <!--  This should happen after Ops Chief assesses which HHS, DHS, and DOD resources the locality needs for an adequate response. -->
+      <state id="Ops_assistant:assessAbsorptiveCapacity">
+          <onentry>
+            <cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+            <cs:var name="addressee" expr="'OpsChief'" />
+            <cs:var name="messageType" expr="'notify'" />
+            <cs:var name="messageSummary" expr="'Assess absorptive capacity'" />
+            <cs:var name="messageText"
+              expr="'Before asking for these Federal resources, you should determine that your locality has capacity to absorb them. Meet with your DEOC now to discuss this.'" />
+            <cs:var name="numResponses" expr="0" />
+            <cst:sendUserMessage />
+          </onentry>
+          <onexit>
+            <assign name="precedingUserMsg" expr="''" />
+          </onexit>
+          <transition cond="_eventdata.getMessageID() eq messageID"
+            target="Ops_assistant:idle">
+          </transition>
+      </state>
+
+
+			<!-- This should happen soon after RSS and POD resources have been allocated 
+				and finalized. Message should come at the same time DEOC and JIC receive 
+				theirs to review the Mayor brief. This will be triggered by the review.mayor.briefing 
+				event after The DEOC assistant has approved the POD allocations -->
+			<state id="Ops_assistant:reviewMayorBriefing">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'OpsChief'" />
+					<cs:var name="messageType" expr="'notify'" />
+					<cs:var name="messageSummary" expr="'Review Mayor briefing'" />
+					<cs:var name="messageText"
+						expr="'It is time to discuss the Mayor'+dm.getApostrophe()+' briefing with your JIC and DEOC.  It should include public briefing information plus resource allocations and requests'" />
+					<cs:var name="numResponses" expr="0" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID" target="Ops_assistant:idle">
+				</transition>
+			</state>
+
+			<state id="Ops_assistant:PodRejected">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'OpsChief'" />
+					<cs:var name="messageType" expr="'notify'" />
+					<cs:var name="messageSummary" expr="'POD allocation rejected'" />
+					<cs:var name="messageText"
+						expr="'The EOC Director has rejected your POD allocation plan for '+dm.getPodName(PodID)+'. Please discuss with the EOC director and enter a new plan.'" />
+					<cs:var name="numResponses" expr="0" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID" target="Ops_assistant:allocateToPod">
+				</transition>
+			</state>
+
+			<state id="Ops_assistant:allocateToUsps:askAllocation">
+				<onentry>
+					<assign name="precedingUserMsg" expr="''" />
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'OpsChief'" />
+					<cs:var name="messageType" expr="'notify'" />
+					<cs:var name="messageSummary" expr="'Allocate USPS resources'" />
+					<cs:var name="messageText"
+						expr="'We need to allocate resources to the Postal Service for antibiotic delivery'" />
+					<cs:var name="numResponses" expr="0" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID" target="Ops_assistant:allocateToUsps">
+				</transition>
+			</state>
+
+			<state id="Ops_assistant:allocateToUsps" initial="Ops_assistant:allocateToUsps:askCarriers">
+
+				<onentry>
+					<cs:var name="UspsCarriers" expr="0" />
+					<cs:var name="UspsLE" expr="0" />
+				</onentry>
+
+				<state id="Ops_assistant:allocateToUsps:askCarriers">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'OpsChief'" />
+						<cs:var name="messageType" expr="'question'" />
+						<cs:var name="messageSummary" expr="'Letter Carriers?'" />
+						<cs:var name="messageText"
+							expr="'How many letter carriers would you like to send?'" />
+						<cs:var name="numResponses" expr="3" />
+						<cs:var name="responseID0" expr="messageID+':0'" />
+						<cs:var name="responseFollowup0" expr="true" />
+						<cs:var name="shortResponse0" expr="'100'" />
+						<cs:var name="longResponse0"
+							expr="'Let'+dm.getApostrophe()+'s send one hundred letter carriers (throughput: 15,000 people/hour)'" />
+						<cs:var name="responseID1" expr="messageID+':1'" />
+						<cs:var name="responseFollowup1" expr="true" />
+						<cs:var name="shortResponse1" expr="'200'" />
+						<cs:var name="longResponse1"
+							expr="'Let'+dm.getApostrophe()+'s send two hundred letter carriers (throughput: 30,000 people/hour)'" />
+						<cs:var name="responseID2" expr="messageID+':2'" />
+						<cs:var name="responseFollowup2" expr="true" />
+						<cs:var name="shortResponse2" expr="'300'" />
+						<cs:var name="longResponse2"
+							expr="'Let'+dm.getApostrophe()+'s send three hundred clinical staff (throughput: 45,000 people/hour)'" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+						target="Ops_assistant:allocateToUsps:askLE">
+						<assign name="UspsCarriers" expr="100" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+						target="Ops_assistant:allocateToUsps:askLE">
+						<assign name="UspsCarriers" expr="200" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+						target="Ops_assistant:allocateToUsps:askLE">
+						<assign name="UspsCarriers" expr="300" />
+					</transition>
+				</state>
+
+
+				<state id="Ops_assistant:allocateToUsps:askLE">
+					<onentry>
+						<cs:var name="requiredLE" expr="UspsCarriers *3" />
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'OpsChief'" />
+						<cs:var name="messageType" expr="'question'" />
+						<cs:var name="messageSummary" expr="'Law enforcement?'" />
+						<cs:var name="messageText"
+							expr="'You need to send 3 law enforcement officers for each letter carrier for a total of ' + requiredLE + ' officers. Ok?'" />
+						<cs:var name="numResponses" expr="2" />
+						<cs:var name="responseID0" expr="messageID+':0'" />
+						<cs:var name="responseFollowup0" expr="true" />
+						<cs:var name="shortResponse0" expr="'Yes'" />
+						<cs:var name="longResponse0" expr="'Send that number of officers'" />
+						<cs:var name="responseID1" expr="messageID+':1'" />
+						<cs:var name="responseFollowup1" expr="true" />
+						<cs:var name="shortResponse1" expr="'No'" />
+						<cs:var name="longResponse1"
+							expr="'That is too many. I will pick fewer letter carriers.'" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+						target="Ops_assistant:allocateToUsps:confirm">
+						<assign name="UspsLE" expr="requiredLE" />
+					</transition>
+					<transition event="user.input"
+						cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+						target="Ops_assistant:allocateToUsps">
+					</transition>
+				</state>
+
+
+				<state id="Ops_assistant:allocateToUsps:confirm">
+					<onentry>
+						<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+						<cs:var name="addressee" expr="'OpsChief'" />
+						<cs:var name="messageType" expr="'notify'" />
+						<cs:var name="messageSummary" expr="'Confirm Usps allocation'" />
+						<cs:var name="messageText"
+							expr="'You have allocated resources postal distribution to as follows: '+UspsCarriers+' letter carriers and '+UspsLE+' law enforcement officers. I will forward this plan to the EOC director for approval.'" />
+						<cs:var name="numResponses" expr="0" />
+						<cst:sendUserMessage />
+					</onentry>
+					<onexit>
+						<assign name="precedingUserMsg" expr="messageID" />
+					</onexit>
+
+					<transition target="Ops_assistant:allocateToUsps:notifyDEOC">
+					</transition>
+				</state>
+
+				<state id="Ops_assistant:allocateToUsps:notifyDEOC">
+					<onentry>
+						<send event="'usps.plan'" namelist="UspsCarriers UspsLE"
+							target="'DEOC_assistant'" targettype="'dm'" />
+					</onentry>
+
+					<transition target="Ops_assistant:allocateToUsps:done" />
+				</state>
+
+				<state id="Ops_assistant:allocateToUsps:done">
+					<transition target="Ops_assistant:idle" />
+				</state>
+
+			</state>
+
+			<state id="Ops_assistant:UspsRejected">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'OpsChief'" />
+					<cs:var name="messageType" expr="'notify'" />
+					<cs:var name="messageSummary" expr="'USPS allocation rejected'" />
+					<cs:var name="messageText"
+						expr="'The EOC Director has rejected your USPS allocation plan. Please discuss with the EOC director and enter a new plan.'" />
+					<cs:var name="numResponses" expr="0" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID" target="Ops_assistant:allocateToUsps">
+				</transition>
+			</state>
+
+		</state>
+
+	</parallel>
+</scxml>

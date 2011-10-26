@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<eren:actionsfile xmlns:eren="urn:mitre:eren:1.0" xmlns:act="urn:mitre:eren:actions:1.0">
+	<act:action>
+		<act:type>OPEN</act:type>
+		<act:displayName>Open POD</act:displayName>
+		<act:roles>
+			<act:role>EOCdir</act:role>
+		</act:roles>
+		<act:statetriggers>
+			<eren:status>AVAILABLE</eren:status>
+		</act:statetriggers>
+		<act:facilityIds>
+			<act:facilityId>POD_01</act:facilityId>
+			<act:facilityId>POD_02</act:facilityId>
+			<act:facilityId>POD_03</act:facilityId>
+			<act:facilityId>POD_04</act:facilityId>
+			<act:facilityId>POD_05</act:facilityId>
+		</act:facilityIds>
+	</act:action>	
+	<act:action>
+		<act:type>CLOSE</act:type>
+		<act:displayName>Close POD</act:displayName>
+		<act:roles>
+			<act:role>EOCdir</act:role>
+		</act:roles>
+		<act:statetriggers>
+			<eren:status>IN_USE</eren:status>
+			<eren:status>NON_FUNCTIONAL</eren:status>
+		</act:statetriggers>
+		<act:facilityIds>
+			<act:facilityId>POD_01</act:facilityId>
+			<act:facilityId>POD_02</act:facilityId>
+			<act:facilityId>POD_03</act:facilityId>
+			<act:facilityId>POD_04</act:facilityId>
+			<act:facilityId>POD_05</act:facilityId>
+		</act:facilityIds>
+	</act:action>		
+	<act:action>
+		<act:type>COMMIT</act:type>
+		<act:displayName>Send Additional Law Enforcement</act:displayName>
+		<act:resource>LE_STAFF</act:resource>
+		<act:inputs>
+			<act:input type="integer" name="quantity" from="Ops_assistant">
+				<act:questionText>You have requested to send law enforcement staff. How many would you like to send?
+				</act:questionText>
+				<eren:min>1</eren:min>
+				<eren:max>50</eren:max>
+			</act:input>		
+		</act:inputs>
+		<act:roles>
+			<act:role>OpsChief</act:role>
+		</act:roles>
+		<act:statetriggers>
+			<eren:status>IN_USE</eren:status>
+			<eren:status>NON_FUNCTIONAL</eren:status>
+		</act:statetriggers>
+		<act:facilityIds>
+			<act:facilityId>POD_01</act:facilityId>
+			<act:facilityId>POD_02</act:facilityId>
+			<act:facilityId>POD_03</act:facilityId>
+			<act:facilityId>POD_04</act:facilityId>
+			<act:facilityId>POD_05</act:facilityId>
+		</act:facilityIds>
+	</act:action>
+	<act:action>
+		<act:type>RELEASE</act:type>
+		<act:displayName>Release Law Enforcement</act:displayName>
+		<act:resource>LE_STAFF</act:resource>
+		<act:inputs>
+			<act:input type="integer" name="quantity" from="Ops_assistant">
+				<act:questionText>You have requested to release law enforcement staff. How many would you like to release?
+				</act:questionText>
+				<eren:min>1</eren:min>
+				<eren:max>50</eren:max>
+			</act:input>
+		</act:inputs>		
+		<act:roles>
+			<act:role>OpsChief</act:role>
+		</act:roles>
+		<act:statetriggers>
+			<eren:status>IN_USE</eren:status>
+			<eren:status>NON_FUNCTIONAL</eren:status>
+		</act:statetriggers>
+		<act:facilityIds>
+			<act:facilityId>POD_01</act:facilityId>
+			<act:facilityId>POD_02</act:facilityId>
+			<act:facilityId>POD_03</act:facilityId>
+			<act:facilityId>POD_04</act:facilityId>
+			<act:facilityId>POD_05</act:facilityId>
+		</act:facilityIds>
+	</act:action>		
+	<act:action>
+		<act:type>COMMIT</act:type>
+		<act:displayName>Send Medical Staff</act:displayName>
+		<act:resource>CLINICAL_STAFF</act:resource>
+		<act:inputs>
+			<act:input type="integer" name="quantity" from="Ops_assistant">
+				<act:questionText>You have requested to send medical staff. How many would you like to send?
+				</act:questionText>
+				<eren:min>1</eren:min>
+				<eren:max>50</eren:max>
+			</act:input>
+		</act:inputs>
+		<act:roles>
+			<act:role>OpsChief</act:role>
+		</act:roles>
+		<act:statetriggers>
+			<eren:status>IN_USE</eren:status>
+			<eren:status>NON_FUNCTIONAL</eren:status>
+		</act:statetriggers>
+		<act:facilityIds>
+			<act:facilityId>POD_01</act:facilityId>
+			<act:facilityId>POD_02</act:facilityId>
+			<act:facilityId>POD_03</act:facilityId>
+			<act:facilityId>POD_04</act:facilityId>
+			<act:facilityId>POD_05</act:facilityId>
+		</act:facilityIds>
+	</act:action>
+	<act:action>
+		<act:type>RELEASE</act:type>
+		<act:displayName>Release Medical Staff</act:displayName>
+		<act:resource>CLINICAL_STAFF</act:resource>
+		<act:inputs>
+			<act:input type="integer" name="quantity" from="Ops_assistant">
+				<act:questionText>You have requested to release medical staff. How many would you like to release?
+				</act:questionText>
+				<eren:min>1</eren:min>
+				<eren:max>50</eren:max>
+			</act:input>
+		</act:inputs>
+		<act:roles>
+			<act:role>OpsChief</act:role>
+		</act:roles>
+		<act:statetriggers>
+			<eren:status>IN_USE</eren:status>
+			<eren:status>NON_FUNCTIONAL</eren:status>
+		</act:statetriggers>
+		<act:facilityIds>
+			<act:facilityId>POD_01</act:facilityId>
+			<act:facilityId>POD_02</act:facilityId>
+			<act:facilityId>POD_03</act:facilityId>
+			<act:facilityId>POD_04</act:facilityId>
+			<act:facilityId>POD_05</act:facilityId>
+		</act:facilityIds>
+	</act:action>		
+	<act:action>
+		<act:type>COMMIT</act:type>
+		<act:displayName>Send Support Staff</act:displayName>
+		<act:resource>OPS_STAFF</act:resource>
+		<act:inputs>
+			<act:input type="integer" name="quantity" from="Ops_assistant">
+				<act:questionText>You have requested to send support staff. How many would you like to send?
+				</act:questionText>
+				<eren:min>1</eren:min>
+				<eren:max>50</eren:max>
+			</act:input>
+		</act:inputs>
+		<act:roles>
+			<act:role>OpsChief</act:role>
+		</act:roles>
+		<act:statetriggers>
+			<eren:status>IN_USE</eren:status>
+			<eren:status>NON_FUNCTIONAL</eren:status>
+		</act:statetriggers>
+		<act:facilityIds>
+			<act:facilityId>POD_01</act:facilityId>
+			<act:facilityId>POD_02</act:facilityId>
+			<act:facilityId>POD_03</act:facilityId>
+			<act:facilityId>POD_04</act:facilityId>
+			<act:facilityId>POD_05</act:facilityId>
+		</act:facilityIds>
+	</act:action>
+	<act:action>
+		<act:type>RELEASE</act:type>
+		<act:displayName>Release Support Staff</act:displayName>
+		<act:resource>OPS_STAFF</act:resource>
+		<act:inputs>
+			<act:input type="integer" name="quantity" from="Ops_assistant">
+				<act:questionText>You have requested to release support staff. How many would you like to release?
+				</act:questionText>
+				<eren:min>1</eren:min>
+				<eren:max>50</eren:max>
+			</act:input>
+		</act:inputs>
+		<act:roles>
+			<act:role>OpsChief</act:role>
+		</act:roles>
+		<act:statetriggers>
+			<eren:status>IN_USE</eren:status>
+			<eren:status>NON_FUNCTIONAL</eren:status>
+		</act:statetriggers>
+		<act:facilityIds>
+			<act:facilityId>POD_01</act:facilityId>
+			<act:facilityId>POD_02</act:facilityId>
+			<act:facilityId>POD_03</act:facilityId>
+			<act:facilityId>POD_04</act:facilityId>
+			<act:facilityId>POD_05</act:facilityId>
+		</act:facilityIds>
+	</act:action>
+	<act:action>
+		<act:type>SETSTANDARDOFCARE</act:type>
+		<act:displayName>Set Standard of Care</act:displayName>
+		<act:inputs>
+			<act:input type="integer" name="value" from="Ops_assistant">
+				<act:questionText>You have requested to change the standard of care of this POD. What would you like to change it to?
+				</act:questionText>
+				<eren:min>1</eren:min>
+				<eren:max>6</eren:max>
+			</act:input>
+		</act:inputs>
+		<act:roles>
+			<act:role>OpsChief</act:role>
+		</act:roles>
+		<act:statetriggers>
+			<eren:status>IN_USE</eren:status>
+		</act:statetriggers>
+		<act:facilityIds>
+			<act:facilityId>POD_01</act:facilityId>
+			<act:facilityId>POD_02</act:facilityId>
+			<act:facilityId>POD_03</act:facilityId>
+			<act:facilityId>POD_04</act:facilityId>
+			<act:facilityId>POD_05</act:facilityId>
+		</act:facilityIds>
+	</act:action>
+</eren:actionsfile>	

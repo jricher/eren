@@ -1,0 +1,33 @@
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0"
+  xmlns:cs="http://commons.apache.org/scxml" xmlns:cst="urn:mitre:eren:dlg:custom:1.0"
+  xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:eren="urn:mitre:eren:1.0"
+  xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3"
+  xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+  xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+  xmlns:xi="http://www.w3.org/2001/XInclude" 
+  id="AirportManager" initialstate="AirportManager:waitForEvents">
+  
+  <state id="AirportManager:waitForEvents">
+    <transition event="pushpack.arrival" target="AirportManager:notifyPushpackArrival"/>
+  </state>
+  
+  <state id="AirportManager:notifyPushpackArrival">
+    <onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+          xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+          xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+          xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+          <cs:var name="messageID" expr="dm.nextMessageId(msgSrc)"/>
+          <cs:var name="messageType" expr="'status.report'"/>
+          <cs:var name="airportID" expr="'Airport_01'"/>
+          <cs:var name="organization" expr="dm.getAirportName(airportID)" />
+          <cs:var name="resourceName" expr="'SNS Push Pack'" />
+          <cs:var name="resourceTypeValue" expr="'SNS_PUSH_PACK'" />
+          <cs:var name="resourceStatus" expr="'Arrived'" />
+          <cs:var name="scheduleType" expr="'BeginAvailable'" />
+          <cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+          <cs:var name="locationDescription" expr="airportID" />
+          <cst:sendResourceMessage />
+    </onentry>
+    <transition target="AirportManager:waitForEvents" />
+  </state>
+</scxml>

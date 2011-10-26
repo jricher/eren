@@ -1,0 +1,106 @@
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0"
+  xmlns:cs="http://commons.apache.org/scxml" xmlns:cst="urn:mitre:eren:dlg:custom:1.0"
+  xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:eren="urn:mitre:eren:1.0"
+  xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3"
+  xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+  xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+  xmlns:xi="http://www.w3.org/2001/XInclude" 
+  id="FEMArep" initialstate="FEMArep:waitForStart">
+  
+  <state id="FEMArep:waitForStart">
+    <onentry>
+      <cs:var name="precedingUserMsg" expr="''" />
+      <cs:var name="precedingRsrcMsg" expr="''" />
+      <cs:var name="originatingRsrcMsg" expr="''" />
+    </onentry>
+    <transition event="fema.support.offered" target="FEMArep:offerSupport"/>
+  </state>
+
+  <state id="FEMArep:offerSupport">
+    <onentry>
+      <cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+      <cs:var name="addressee" expr="'EOCdir'"/>
+      <cs:var name="messageType" expr="'inform'" />
+      <cs:var name="messageSummary" expr="'Offer Assistance'" />
+      <cs:var name="messageText" expr="'Hello, I'm calling from FEMA to see how we can help you there in Norfolk.'" />
+      <cs:var name="numResponses" expr="1"/>
+      <cs:var name="responseID0" expr="messageID+':0'"/>
+      <cs:var name="responseFollowup0" expr="true" />
+      <cs:var name="shortResponse0" expr="'Request FEMA support'" />
+      <cs:var name="longResponse0" expr="'Yes, we have an outbreak of anthrax. I would like to ask you to send over some equipment and resources to help us out here.'" />
+      <cst:sendUserMessage />
+    </onentry>
+    <onexit>
+      <assign name="precedingUserMsg" expr="messageID"/>
+    </onexit>
+    <transition event="user.input"
+      cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+      target="FEMArep:askFood">
+    </transition>
+  </state>
+  
+  <state id="FEMArep:askFood">
+  <onentry> 
+      <cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+      <cs:var name="addressee" expr="'EOCdir'"/>
+      <cs:var name="messageType" expr="'inform'" />
+      <cs:var name="messageSummary" expr="'What is needed?'" />
+      <cs:var name="messageText" expr="'How much food and water is needed there?'" />
+      <cs:var name="numResponses" expr="3"/>
+      <cs:var name="responseID0" expr="messageID+':0'"/>
+      <cs:var name="responseFollowup0" expr="true" />
+      <cs:var name="shortResponse0" expr="'3 days'" />
+      <cs:var name="longResponse0" expr="'We anticipate needing food and water for the entire population to last about 3 days.'" />
+      <cs:var name="responseID0" expr="messageID+':0'"/>
+      <cs:var name="responseFollowup0" expr="true" />
+      <cs:var name="shortResponse0" expr="'7 days'" />
+      <cs:var name="longResponse0" expr="'We anticipate needing food and water for the entire population to last about 7 days.'" />
+      <cs:var name="responseID0" expr="messageID+':0'"/>
+      <cs:var name="responseFollowup0" expr="true" />
+      <cs:var name="shortResponse0" expr="'none'" />
+      <cs:var name="longResponse0" expr="'We don't need any food or water. We have enough to last us through this crisis'" />
+      <cst:sendUserMessage />
+    </onentry>
+    <onexit>
+      <assign name="precedingUserMsg" expr="messageID"/>
+    </onexit>
+    <transition event="user.input" 
+    cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+      target="FEMArep:requestFood">
+      <cs:var name="foodAmount" expr="3"/>
+    </transition>
+    <transition event="user.input" 
+    cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+      target="FEMArep:requestFood">
+      <cs:var name="foodAmount" expr="7"/>
+    </transition>
+    <transition event="user.input" 
+    cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+      target="FEMArep:noFoodNeeded">
+    </transition>
+  </state>
+  
+  <state id="FEMArep:requestFood">
+          <onentry xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+          xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+          xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+          xmlns:xal="urn:oasis:names:tc:ciq:xal:3" xmlns:gml="http://www.opengis.net/gml">
+          <cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+          <cs:var name="messageType" expr="'request.resource'" />
+          <cs:var name="resourceName" expr="'Food and Water'" />
+          <cs:var name="resourceTypeValue" expr="'FOOD_AND_WATER'" />
+          <cs:var name="scheduleType" expr="'RequestedArrival'" />
+          <cs:var name="scheduleDateTime" expr="dm.getCurrentDate()" />
+          <cs:var name="latitude" expr="dm.getRssLat()" />
+          <cs:var name="longitude" expr="dm.getRssLon()" />
+          <cst:sendResourceMessage />
+        </onentry>
+        <transition target="DEOC_assistant:requested" />
+  
+  </state>
+  
+  <state id="FEMArep:noFoodNeeded">
+  </state>
+  
+  
+</scxml>

@@ -1,0 +1,208 @@
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0"
+	xmlns:cs="http://commons.apache.org/scxml" xmlns:cst="urn:mitre:eren:dlg:custom:1.0"
+	xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:eren="urn:mitre:eren:1.0"
+	xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+	xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg" xmlns:xi="http://www.w3.org/2001/XInclude"
+	id="NorfolkMayor" initialstate="NorfolkMayor:brain">
+
+
+
+	<parallel id="NorfolkMayor:brain">
+		<onentry>
+			<cs:var name="precedingUserMsg" expr="''" />
+			<cs:var name="precedingRsrcMsg" expr="''" />
+			<cs:var name="originatingRsrcMsg" expr="''" />
+			<cs:var name="PodID" expr="''" />
+		</onentry>
+
+
+		<state id="NorfolkMayor:attention">
+		</state>
+
+		<state id="NorfolkMayor:dialogues" initial="NorfolkMayor:waitForStart">
+			<state id="NorfolkMayor:waitForStart">
+				<transition event="mayor.wants.pod"
+					cond="dm.hasResourceStatus(_eventdata,'POD','Not Requested')"
+					target="NorfolkMayor:introduce">
+					<assign name="PodID" expr="_eventdata" />
+				</transition>
+			</state>
+
+			<state id="NorfolkMayor:idle">
+			</state>
+
+
+			<state id="NorfolkMayor:introduce">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'inform'" />
+					<cs:var name="messageSummary" expr="'New POD location needed'" />
+					<cs:var name="messageText"
+						expr="'I hear that you are deciding on the location for your Points of Distribution'" />
+					<cs:var name="messageLocation" expr="PodID" />
+					<cs:var name="numResponses" expr="1" />
+					<cs:var name="responseID0" expr="messageID+':0'" />
+					<cs:var name="responseFollowup0" expr="true" />
+					<cs:var name="shortResponse0" expr="'Yes, that is correct'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+					target="NorfolkMayor:requestNewPOD">
+				</transition>
+			</state>
+
+			<state id="NorfolkMayor:requestNewPOD">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'inform'" />
+					<cs:var name="messageSummary" expr="'New POD location needed'" />
+					<cs:var name="messageText"
+						expr="'I need you to open a new Point of Distribution at ' + dm.getPodName(PodID)" />
+					<cs:var name="messageLocation" expr="PodID" />
+					<cs:var name="numResponses" expr="3" />
+					<cs:var name="responseID0" expr="messageID+':0'" />
+					<cs:var name="responseFollowup0" expr="true" />
+					<cs:var name="shortResponse0"
+						expr="'Isn'+dm.getApostrophe()+'t that right next door to your house?'" />
+					<cs:var name="responseID1" expr="messageID+':1'" />
+					<cs:var name="responseFollowup1" expr="true" />
+					<cs:var name="shortResponse1" expr="'Ok, sir. I will do that right away!'" />
+					<cs:var name="responseID2" expr="messageID+':2'" />
+					<cs:var name="responseFollowup2" expr="true" />
+					<cs:var name="shortResponse2" expr="'I'+dm.getApostrophe()+'m sorry.'" />
+					<cs:var name="longResponse2"
+						expr="'I'+dm.getApostrophe()+'m sorry sir, I can'+dm.getApostrophe()+'t do that now. All of our resources are occupied'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+					target="NorfolkMayor:defensive">
+				</transition>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+					target="NorfolkMayor:thanks">
+					<send event="'open.new.pod'" namelist="PodID" target="'DEOC_assistant'"
+						targettype="'dm'" />
+				</transition>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID2"
+					target="NorfolkMayor:angry">
+				</transition>
+			</state>
+
+
+			<state id="NorfolkMayor:defensive">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'inform'" />
+					<cs:var name="messageSummary" expr="'Defensive'" />
+					<cs:var name="messageText"
+						expr="'What does that have to do with anything! Now will you do this or not?'" />
+					<cs:var name="numResponses" expr="2" />
+					<cs:var name="responseID0" expr="messageID+':0'" />
+					<cs:var name="responseFollowup0" expr="true" />
+					<cs:var name="shortResponse0" expr="'Ok, I will do it.'" />
+					<cs:var name="responseID1" expr="messageID+':1'" />
+					<cs:var name="responseFollowup1" expr="true" />
+					<cs:var name="shortResponse1" expr="'I'+dm.getApostrophe()+'m sorry.'" />
+					<cs:var name="longResponse1"
+						expr="'I'+dm.getApostrophe()+'m sorry sir, I can'+dm.getApostrophe()+'t do that now. All of our resources are occupied'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+					target="NorfolkMayor:thanks">
+					<send event="'open.new.pod'" namelist="PodID" target="'DEOC_assistant'"
+						targettype="'dm'" />
+				</transition>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+					target="NorfolkMayor:angry">
+				</transition>
+			</state>
+
+			<state id="NorfolkMayor:thanks">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'inform'" />
+					<cs:var name="messageSummary" expr="'Thanks!'" />
+					<cs:var name="messageText" expr="'Thanks for your help!'" />
+					<cs:var name="numResponses" expr="0" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition target="NorfolkMayor:idle" />
+			</state>
+
+			<state id="NorfolkMayor:angry">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'inform'" />
+					<cs:var name="messageSummary" expr="'Angry'" />
+					<cs:var name="messageText"
+						expr="'Listen, I'+dm.getApostrophe()+'m in charge here and I want that POD opened now!'" />
+					<cs:var name="numResponses" expr="2" />
+					<cs:var name="responseID0" expr="messageID+':0'" />
+					<cs:var name="responseFollowup0" expr="true" />
+					<cs:var name="shortResponse0" expr="'Ok, I will do it.'" />
+					<cs:var name="responseID1" expr="messageID+':1'" />
+					<cs:var name="responseFollowup1" expr="true" />
+					<cs:var name="shortResponse1" expr="'I'+dm.getApostrophe()+'m sorry.'" />
+					<cs:var name="longResponse1"
+						expr="'I'+dm.getApostrophe()+'m sorry sir, I just can'+dm.getApostrophe()+'t do it.'" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<cs:var name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+					target="NorfolkMayor:thanks">
+					<send event="'open.new.pod'" namelist="PodID" target="'DEOC_assistant'"
+						targettype="'dm'" />
+				</transition>
+				<transition event="user.input"
+					cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+					target="NorfolkMayor:threaten">
+				</transition>
+			</state>
+
+			<state id="NorfolkMayor:threaten">
+				<onentry>
+					<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+					<cs:var name="addressee" expr="'EOCdir'" />
+					<cs:var name="messageType" expr="'inform'" />
+					<cs:var name="messageSummary" expr="'Threaten'" />
+					<cs:var name="messageText" expr="'Alright, you will be sorry!'" />
+					<cs:var name="numResponses" expr="0" />
+					<cst:sendUserMessage />
+				</onentry>
+				<onexit>
+					<assign name="precedingUserMsg" expr="messageID" />
+				</onexit>
+				<transition target="NorfolkMayor:idle" />
+			</state>
+
+
+		</state>
+
+	</parallel>
+
+</scxml>

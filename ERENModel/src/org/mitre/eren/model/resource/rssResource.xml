@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : rssResource.xml
+    Created on : December 6, 2010, 2:45 PM
+    Author     : JWINSTON
+    Description:
+        Purpose of the document follows.
+-->
+
+<scxml xmlns="http://www.w3.org/2005/07/scxml"
+       xmlns:cs="http://commons.apache.org/scxml"
+       version="1.0"
+       profile="ecmascript"
+       initial="unSent">
+
+    <state id="unSent">
+        <transition event="send" target="enroute"/>
+    </state>
+
+    <state id="enroute">
+        <transition event="resourceArrived" target="arrived"/>
+    </state>
+
+    <state id="arrived">
+        <transition event="open" target="open"/>
+    </state>
+
+</scxml>

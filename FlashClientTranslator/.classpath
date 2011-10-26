@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="lib" path="lib/abdera-client-1.0-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-client-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-core-1.0-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-core-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-couchdb-1.0-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-couchdb-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-filesystem-1.0-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-filesystem-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-i18n-1.0-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-i18n-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-jcr-1.0-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-jcr-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-jdbc-1.0-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-jdbc-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-parser-1.0-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-parser-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-server-1.0-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-server-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-spring-1.0-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="lib/abdera-spring-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging.jar"/>
+	<classpathentry kind="lib" path="lib/couchdb4j-0.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/httpclient-4.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/httpcore-4.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/httpcore-nio-4.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/httpmime-4.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/javautil-tiger-1.0.3.jar"/>
+	<classpathentry kind="lib" path="lib/simple-4.1.20.jar"/>
+	<classpathentry kind="lib" path="lib/xSocket-2.8.13.jar"/>
+	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-cli-1.2-javadoc.jar"/>
+	<classpathentry kind="lib" path="lib/commons-cli-1.2-sources.jar"/>
+	<classpathentry kind="lib" path="lib/opencare-edxl-lib.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ERENMessages"/>
+	<classpathentry kind="lib" path="C:/Documents and Settings/tmlewis/Desktop/svn/EREN_Resources/lib/guava-r09.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

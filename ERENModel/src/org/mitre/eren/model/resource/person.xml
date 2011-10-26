@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml"
+       xmlns:cs="http://commons.apache.org/scxml"
+       version="1.0"
+       profile="ecmascript"
+       initial="person">
+
+  
+
+  <parallel id="person">
+
+    <onentry>
+      <cs:var name="beenToHospital" expr="false"/>
+      <cs:var name="beenToPOD" expr="false"/>
+    </onentry>
+  
+    <state id="sickness" initial="well">
+
+      <state id="well">
+          <onentry>
+            <!--<log expr="'In well state'"/> -->
+          </onentry>
+          <transition event="turn.incubational" target="incubational"/>
+      </state>
+
+      <state id="incubational">
+        <onentry>
+            <!--<log expr="'In incubational state'"/> -->
+        </onentry>
+        <transition event="turn.prodromal" target="prodromal"/>
+        <transition event="turn.recovered" target="recovered"/>
+      </state>
+      
+      <state id="prodromal">
+	    <onentry>
+            <!--<log expr="'In prodromal state'"/> -->
+        </onentry>
+        <transition cond="In('hospital')" target="admitted"/>
+        <transition event="turn.fulminant" target="fulminant"/>
+        <transition event="turn.recovered" target="recovered"/>
+      </state>
+      
+      <state id="fulminant">
+	    <onentry>
+           <!--<log expr="'In fulminant state'"/> -->
+        </onentry>
+        <transition event="turn.dead" target="dead"/>
+      </state>
+      
+      <final id="dead">
+        <onentry>
+            <!--<log expr="'I am dead'"/> -->
+            <send event="'location.dead'"/>
+        </onentry>
+      </final>
+      
+      <final id="recovered">
+	    <onentry>
+            <!-- <log expr="'I am all better!'"/> -->
+            <send event="'location.toHome'"/>
+        </onentry>
+      </final>
+      
+    </state> <!-- sickness -->
+
+
+<!-- The locationContainer state simply contains the location state.
+Its purpose is to let the location state share the dead and home transition events
+without triggering the feature of parallel states that resets parallels to their
+initial states when another exits-->
+    <state id="locationContainer" initial="location">
+
+        <state id="location" initial="home">
+            <transition event="location.dead" target="morgue"/>
+            <transition event="location.toHome" target="home"/>
+
+            <state id="home">
+                <onentry> <!--<log expr="'I am Home'"/>--> </onentry>
+                <transition event="location.toPOD" cond="!beenToHospital and !beenToPOD" target="pod"/>
+                <transition event="location.toHospital" target="hospital"/>
+            </state>
+      
+            <state id="pod">
+                <onentry>
+                    <!--<log expr="'I am in a POD'"/> -->
+                    <assign name="beenToPOD" expr="true"/>
+                </onentry>
+                <onexit>
+                    <assign name="beenToPOD" expr="true"/>
+                </onexit>
+                <transition event="location.toHome" target="home"/>
+            </state>
+
+            <state id="hospital">
+                <onentry>
+                    <!--<log expr="'I am in Hospital'"/> -->
+                    <assign name="beenToHospital" expr="true"/>
+                </onentry>
+                <onexit>
+                    <assign name="beenToHospital" expr="true"/>
+                </onexit>
+                <transition event="location.toAdmitted" target="admitted"/>
+            </state>
+
+            <state id="admitted">
+                <onentry><!--<log expr="'I have been Admitted'"/> --></onentry>
+            </state>
+
+            <final id="morgue">
+                <onentry><!--<log expr="'I am in the Morgue'"/>--></onentry>
+            </final>
+         </state>
+    </state>
+  </parallel> 
+</scxml>

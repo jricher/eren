@@ -1,0 +1,315 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xnal="urn:oasis:names:tc:ciq:xnal:3"
+            xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+            xmlns:xal="urn:oasis:names:tc:ciq:xal:3"
+            xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3"
+            xmlns:geo-oasis="urn:oasis:names:tc:emergency:EDXL:HAVE:1.0:geo-oasis"
+            xmlns="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+  targetNamespace="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+   elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+  <!-- All elements that have unchanged internal content across the entire matrix of 
+       RM messages are typed here. 
+       Where internal content differs between messages, please see the appropriate 
+       schemas. -->
+  <xsd:import namespace="urn:oasis:names:tc:ciq:xpil:3" schemaLocation="xpil.xsd"/>
+  <xsd:import namespace="urn:oasis:names:tc:ciq:xal:3" schemaLocation="xal.xsd"/>
+  <xsd:import namespace="urn:oasis:names:tc:ciq:xnl:3" schemaLocation="xnl.xsd"/>
+
+  <xsd:import namespace="urn:oasis:names:tc:emergency:EDXL:HAVE:1.0:geo-oasis"
+ schemaLocation="geo-oasis.xsd"/>
+  <xsd:simpleType name="MessageIDType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="DateTimeType">
+    <xsd:restriction base="xsd:dateTime"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="MessageContentTypeType">
+    <xsd:restriction base="xsd:string">
+      <xsd:annotation>
+        <xsd:documentation>
+          The following strings values for MessageContentType
+          are reserved for Level 2 Conformant Message types (New
+          level 1 conformant messagetypes should use other name strings):
+
+          RequestResource
+          ResponseToRequestResource
+          RequisitionResource
+          CommitResource
+          RequestInformation
+          ResponseToRequestInformation
+          OfferUnsolicitedResource
+          ReleaseResource
+          RequestReturn
+          ResponseToRequestReturn
+          RequestQuote
+          ResponseToRequestQuote
+          RequestResourceDeploymentStatus
+          ReportResourceDeploymentStatus
+          RequestExtendedDeploymentDuration
+          ResponseToRequestExtendedDeploymentDuration
+        </xsd:documentation>
+      </xsd:annotation>
+
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:simpleType name="MessageDescriptionType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:complexType name="IncidentInformationType">
+    <!-- One(or both) of the IncidentID and IncidentDescription elements is required -->
+    <xsd:sequence>
+      <xsd:element name="IncidentID" type="IncidentIDType" minOccurs="0"/>
+      <xsd:element name="IncidentDescription" type="IncidentDescriptionType"
+     minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:simpleType name="IncidentIDType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="IncidentDescriptionType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:complexType name="MessageRecallType">
+    <xsd:sequence>
+      <xsd:element name="RecallMessageID" type="MessageIDType"/>
+      <xsd:element name="RecallType" type="RecallTypeType"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:simpleType name="RecallTypeType">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="Update"/>
+      <xsd:enumeration value="Cancel"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:complexType name="FundingType">
+    <!-- One (or both) of the FundCode and FundingInfo elements is required -->
+    <xsd:sequence>
+      <xsd:element name="FundCode" type="FundCodeType" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="FundingInfo" type="FundingInfoType" minOccurs="0"
+     maxOccurs="1"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:simpleType name="FundCodeType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="FundingInfoType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:complexType name="ContactInformationType">
+    <xsd:sequence>
+      <!-- At least one of ContactDescription and ContextRole is required -->
+      <xsd:element name="ContactDescription" type="ContactDescriptionType" minOccurs="0"
+          maxOccurs="1"/>
+      <xsd:element name="ContactRole" type="ContactRoleType" minOccurs="0"
+     maxOccurs="1"/>
+      <xsd:element name="Radio" type="RadioInformationType" minOccurs="0"
+     maxOccurs="unbounded"/>
+      <xsd:element name="ContactLocation" type="LocationType" minOccurs="0"
+     maxOccurs="1"/>
+      <xsd:element name="AdditionalContactInformation" type="xpil:PartyType"
+     minOccurs="0" maxOccurs="1"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:simpleType name="ContactDescriptionType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="ContactRoleType">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="Sender"/>
+      <xsd:enumeration value="Requester"/>
+      <xsd:enumeration value="SubjectMatterExpert"/>
+      <xsd:enumeration value="Approver"/>
+      <xsd:enumeration value="RespondingOrg"/>
+      <xsd:enumeration value="Owner"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:complexType name="RadioInformationType">
+    <xsd:sequence>
+      <xsd:element name="RadioType" type="ValueListType"/>
+      <xsd:element name="RadioChannel" type="RadioChannelType"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:simpleType name="RadioTypeType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="RadioChannelType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:complexType name="ResponseInformationType">
+    <xsd:sequence>
+      <xsd:element name="PrecedingResourceInfoElementID"
+     type="ResourceInfoElementIDType"/>
+      <xsd:element name="ResponseType" type="ResponseTypeType"/>
+      <!-- If the ResponseType element has the value "Provisional", one (or both) of 
+        ReasonCode and ResponseReason must be present -->
+      <xsd:element name="ReasonCode" type="ValueListType" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="ResponseReason" type="ResponseReasonType" minOccurs="0"
+     maxOccurs="1"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:simpleType name="ResourceInfoElementIDType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="ResponseTypeType">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="Accept"/>
+      <xsd:enumeration value="Decline"/>
+      <xsd:enumeration value="Provisional"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:simpleType name="ResponseReasonType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="ResourceIDType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="ResourceNameType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:complexType name="TypeInfoType">
+    <xsd:sequence>
+      <xsd:any processContents="skip" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:anyAttribute/>
+  </xsd:complexType>
+  <xsd:simpleType name="DescriptionType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="CredentialsType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="CertificationsType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="SpecialRequirementsType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:complexType name="OwnershipInformationType">
+    <!-- One (or both) of the Owner and OwningJurisdiction elements is required -->
+    <xsd:sequence>
+      <xsd:element name="Owner" type="OwnerType" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="OwningJurisdiction" type="OwningJurisdictionType" minOccurs="0"
+        maxOccurs="1"/>
+      <xsd:element name="HomeDispatch" type="HomeDispatchType" minOccurs="0"
+        maxOccurs="1"/>
+      <xsd:element name="HomeUnit" type="HomeUnitType" minOccurs="0" maxOccurs="1"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:simpleType name="OwnerType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="OwningJurisdictionType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="HomeDispatchType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="HomeUnitType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="AvailabilityType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="QuantityTypeOld">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:complexType name="QuantityType">
+    <xsd:choice>
+      <xsd:element name="QuantityText" type="xsd:string" maxOccurs="unbounded"/>
+      <xsd:element name="MeasuredQuantity">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="Amount" type="xsd:double"/>
+            <xsd:element name="UnitOfMeasure" type="ValueListType" minOccurs="0"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:choice>
+  </xsd:complexType>
+  <xsd:simpleType name="RestrictionsType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="AnticipatedFunctionType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:complexType name="PriceQuoteType">
+    <xsd:complexContent>
+      <xsd:extension base="QuantityType"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:simpleType name="OrderIDType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:complexType name="AssignmentInstructionsType">
+    <xsd:sequence>
+      <xsd:element name="ModeOfTransportation" type="ModeOfTransportationType"
+     minOccurs="0"
+          maxOccurs="1"/>
+      <xsd:element name="NavigationInstructions" type="NavigationInstructionsType"
+          minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="ReportingInstructions" type="ReportingInstructionsType"
+     minOccurs="0"
+          maxOccurs="1"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:simpleType name="ModeOfTransportationType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="NavigationInstructionsType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="ReportingInstructionsType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="ScheduleTypeType">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="RequestedArrival"/>
+      <xsd:enumeration value="EstimatedArrival"/>
+      <xsd:enumeration value="ActualArrival"/>
+      <xsd:enumeration value="RequestedDeparture"/>
+      <xsd:enumeration value="EstimatedDeparture"/>
+      <xsd:enumeration value="ActualDeparture"/>
+      <xsd:enumeration value="EstimatedReturnDeparture"/>
+      <xsd:enumeration value="EstimatedReturnArrival"/>
+      <xsd:enumeration value="ActualReturnArrival"/>
+      <xsd:enumeration value="RequestedReturnDeparture"/>
+      <xsd:enumeration value="RequestedReturnArrival"/>
+      <xsd:enumeration value="ActualReturnDeparture"/>
+      <xsd:enumeration value="BeginAvailable"/>
+      <xsd:enumeration value="EndAvailable"/>
+      <xsd:enumeration value="Committed"/>
+      <xsd:enumeration value="Current"/>
+      <xsd:enumeration value="ReportTo"/>
+      <xsd:enumeration value="Route"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:complexType name="LocationType">
+    <xsd:sequence>
+      <!-- One (or more) of the LocationDescription, Address and TargetArea elements is 
+        required -->
+      <xsd:element name="LocationDescription" type="LocationDescriptionType"
+     minOccurs="0"
+          maxOccurs="1"/>
+      <xsd:element name="Address" type="xal:AddressType" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="TargetArea" type="geo-oasis:WhereType" minOccurs="0"
+     maxOccurs="1"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:simpleType name="LocationDescriptionType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:complexType name="ValueListType">
+    <xsd:sequence>
+      <xsd:element name="ValueListURN" type="ValueListURNType"/>
+      <xsd:element name="Value" type="ValueType" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:simpleType name="ValueListURNType">
+    <xsd:restriction base="xsd:anyURI"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="ValueType">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+</xsd:schema>

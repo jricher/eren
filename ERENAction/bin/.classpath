@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="src/" kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Documents and Settings/tmlewis/Desktop/svn/EREN_Resources/lib/oclib-0.0.1-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="C:/Documents and Settings/tmlewis/Desktop/svn/EREN_Resources/lib/abdera-client-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/EREN_Resources/lib/abdera-client-1.0-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="/EREN_Resources/lib/abdera-client-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/EREN_Resources/lib/abdera-core-1.0-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="/EREN_Resources/lib/abdera-core-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/EREN_Resources/lib/abdera-couchdb-1.0-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="/EREN_Resources/lib/abdera-couchdb-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/EREN_Resources/lib/commons-cli-1.2.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Dialog"/>
+	<classpathentry kind="lib" path="/EREN_Resources/lib/javautil-tiger-1.0.3.jar"/>
+	<classpathentry kind="lib" path="/EREN_Resources/lib/abdera-server-1.0-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="/EREN_Resources/lib/abdera-server-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/EREN_Resources/lib/abdera-spring-1.0-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="/EREN_Resources/lib/abdera-spring-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="C:/Documents and Settings/tmlewis/Desktop/svn/EREN_Resources/lib/httpmime-4.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Documents and Settings/tmlewis/Desktop/svn/EREN_Resources/lib/httpclient-4.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Documents and Settings/tmlewis/Desktop/svn/EREN_Resources/lib/httpcore-4.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Documents and Settings/tmlewis/Desktop/svn/EREN_Resources/lib/httpcore-nio-4.0.1.jar"/>
+	<classpathentry kind="lib" path="/EREN_Resources/lib/ERENMessages.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ERENWrapper"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

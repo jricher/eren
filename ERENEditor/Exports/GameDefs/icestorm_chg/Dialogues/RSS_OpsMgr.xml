@@ -1,0 +1,54 @@
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0"
+	xmlns:cs="http://commons.apache.org/scxml" xmlns:cst="urn:mitre:eren:dlg:custom:1.0"
+	xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:eren="urn:mitre:eren:1.0"
+	xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+	xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg" xmlns:xi="http://www.w3.org/2001/XInclude"
+	id="RSS_OpsManager" initialstate="RSS_OpsMgr:waitForStart">
+
+	<state id="RSS_OpsMgr:waitForStart">
+
+		<onentry>
+			<cs:var name="precedingMsg" expr="''" />
+			<cs:var name="originatingMsg" expr="''" />
+		</onentry>
+
+		<transition event="closed.pod.allocation" target="RSS_OpsMgr:allocateToClosedPods">
+			<assign name="precedingMsg" expr="_eventdata.getMessageID()" />
+			<assign name="originatingMsg" expr="_eventdata.getOriginatingMessageID()" />
+		</transition>
+	</state>
+
+	<state id="RSS_OpsMgr:allocateToClosedPods">
+		<onentry>
+			<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+			<cs:var name="addressee" expr="'EOCdir'" />
+			<cs:var name="messageType" expr="'notify'" />
+			<cs:var name="messageSummary" expr="'Meds for closed PODs'" />
+			<cs:var name="messageText"
+				expr="This is the RSS facility. How much medication should we allocate to the closed/private PODs?" />
+			<cs:var name="messageLocation" expr="podID" />
+			<cs:var name="numResponses" expr="2" />
+			<cs:var name="responseID0" expr="messageID+':0'" />
+			<cs:var name="shortResponse0" expr="'Full supply'" />
+			<cs:var name="longResponse0"
+				expr="'Send them enough medication to treat their entire population'" />
+			<cs:var name="responseID1" expr="messageID+':1'" />
+			<cs:var name="shortResponse1" expr="'Initial supply'" />
+			<cs:var name="longResponse1"
+				expr="'Send them enough for an initial dose. We will send them more later.'" />
+			<cst:sendUserMessage />
+		</onentry>
+
+		<transition event="user.input"
+			cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+			target="RSS_OpsMgr:idle" />
+		<transition event="user.input"
+			cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+			target="RSS_OpsMgr:idle" />
+	</state>
+	
+	<final id="RSS_OpsMgr:idle">
+	
+	</final>
+
+</scxml>

@@ -1,0 +1,39 @@
+<dlg:userMessage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+    xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:msg="urn:mitre:eren:dlg:1.0:msg" 
+	xmlns:eren="urn:mitre:eren:1.0"	xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3">
+	<dlg:sender xpil:ID="Owner:POD_03" dlg:photoURL="/resources/images/NPCs/Reporter.png">
+	  <xpil:PartyName>
+        <xnl:PersonName>
+          <xnl:NameElement xnl:ElementType="FirstName">Jane</xnl:NameElement>
+          <xnl:NameElement xnl:ElementType="LastName">Doe</xnl:NameElement>
+        </xnl:PersonName>
+      </xpil:PartyName>
+      <xpil:Occupations>
+        <xpil:Occupation>
+          <xpil:OccupationElement xpil:Type="Role">Facility Manager</xpil:OccupationElement>
+          <xpil:Employer>
+            <xnl:NameElement>Norfolk Naval Shipyard</xnl:NameElement>
+          </xpil:Employer>
+        </xpil:Occupation> 
+      </xpil:Occupations>
+	</dlg:sender>
+	<dlg:messageID>Owner:P0D03:3</dlg:messageID>
+	<dlg:precedingMessageID></dlg:precedingMessageID>
+	<dlg:priority>0</dlg:priority>
+	<dlg:messageType>question</dlg:messageType>
+	<dlg:summary>Read me!</dlg:summary>
+	<dlg:messageText>This is an announcement! Please acknowledge that you have read it.</dlg:messageText>
+	<dlg:location>
+		<eren:facility>POD_03</eren:facility>
+	</dlg:location>
+	<dlg:kmlLayer dlg:layerID="Daytime zip codes">
+		<dlg:kmlurl>/resources/kml/zipcodes/zipCode23320.kml</dlg:kmlurl>
+		<dlg:kmlurl>/resources/kml/zipcodes/zipCode23321.kml</dlg:kmlurl>
+		<dlg:kmlurl>/resources/kml/zipcodes/zipCode23462.kml</dlg:kmlurl>
+	</dlg:kmlLayer>
+	<dlg:kmlLayer dlg:layerID="Nighttime zip codes">
+		<dlg:kmlurl>/resources/kml/zipcodes/zipCode23502.kml</dlg:kmlurl>
+		<dlg:kmlurl>/resources/kml/zipcodes/zipCode23503.kml</dlg:kmlurl>
+		<dlg:kmlurl>/resources/kml/zipcodes/zipCode23504.kml</dlg:kmlurl>
+	</dlg:kmlLayer>
+</dlg:userMessage>

@@ -1,0 +1,9 @@
+<configoptions xmlns="flash:mitre:org:1.0">
+	<!-- Currently using localhost key: ABQIAAAAnG5rl1bOjLFjF2JLy7FSjxT2yXp_ZAY8_ufC3CFXhHIE1NvwkxRPBCjNi61TTlivKniBVXev-oaFcg  -->
+	<!-- erenbus.mitre.org key: ABQIAAAAnG5rl1bOjLFjF2JLy7FSjxQZ9pAsbiSv8M4k98vbUIU_c1Vu3hS3GTiRuXyK81K3bYtkOGKvpMHoyA -->
+	<!-- erenbus-aanganes.mitre.org key: ABQIAAAAnG5rl1bOjLFjF2JLy7FSjxQhZix1U7AVJ-06Q9kGxLp5YTAxiRTgrSkH9UNoFJjKH9fzHrgNOkkoCw -->
+	<key>ABQIAAAAnG5rl1bOjLFjF2JLy7FSjxT2yXp_ZAY8_ufC3CFXhHIE1NvwkxRPBCjNi61TTlivKniBVXev-oaFcg</key>
+	<bus>true</bus>
+	<host>erenbus-aanganes.mitre.org</host>
+	<port>8090</port>
+</configoptions>

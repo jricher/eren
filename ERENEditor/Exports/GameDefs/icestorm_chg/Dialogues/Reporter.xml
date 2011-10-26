@@ -1,0 +1,9 @@
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0"
+  xmlns:cs="http://commons.apache.org/scxml" xmlns:cst="urn:mitre:eren:dlg:custom:1.0"
+  xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:eren="urn:mitre:eren:1.0"
+  xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3"
+  xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+  xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+  xmlns:xi="http://www.w3.org/2001/XInclude" 
+  id="Reporter">
+</scxml>

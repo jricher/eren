@@ -1,0 +1,135 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+    xmlns:rmsg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+    targetNamespace="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+    xmlns:rm="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+  <xsd:import namespace="urn:oasis:names:tc:emergency:EDXL:RM:1.0"
+   schemaLocation="EDXL-RMCommonTypes.xsd"/>
+  <!-- This schema describes the structure of 
+      EDXL-RM "ResponseToRequestExtendedDeploymentDuration" messages.-->
+  <element name="ResponseToRequestExtendedDeploymentDuration">
+    <complexType>
+      <sequence>
+        <element name="MessageID" type="rm:MessageIDType"/>
+        <element name="SentDateTime" type="rm:DateTimeType"/>
+        <element name="MessageContentType">
+          <simpleType>
+            <restriction base="rm:MessageContentTypeType">
+              <enumeration value="ResponseToRequestExtendedDeploymentDuration"/>
+            </restriction>
+          </simpleType>
+        </element>
+        <element name="MessageDescription" type="rm:MessageDescriptionType"
+       minOccurs="0" maxOccurs="1"/>
+        <element name="OriginatingMessageID" type="rm:MessageIDType"/>
+        <element name="PrecedingMessageID" type="rm:MessageIDType"/>
+        <element name="IncidentInformation" type="rm:IncidentInformationType"
+       minOccurs="0" maxOccurs="unbounded"/>
+        <element name="MessageRecall" type="rm:MessageRecallType" minOccurs="0"
+       maxOccurs="1"/>
+        <element name="Funding" type="rm:FundingType" minOccurs="0"
+       maxOccurs="unbounded"/>
+        <element name="ContactInformation" type="rm:ContactInformationType"
+       minOccurs="1" maxOccurs="unbounded"/>
+        <element name="ResourceInformation" minOccurs="1" maxOccurs="unbounded">
+          <complexType>
+            <sequence>
+              <element name="ResourceInfoElementID"
+             type="rm:ResourceInfoElementIDType"/>
+              <element name="ResponseInformation" type="rm:ResponseInformationType"/>
+              <element name="Resource" minOccurs="0" maxOccurs="1">
+                <complexType>
+                  <sequence>
+                    <!-- One (or more) of first three elements is required -->
+                    <element name="ResourceID" type="rm:ResourceIDType" minOccurs="0"
+                   maxOccurs="1"/>
+                    <element name="Name" type="rm:ResourceNameType" minOccurs="0"
+                   maxOccurs="1"/>
+                    <element name="TypeStructure" type="rm:ValueListType" minOccurs="0"
+                   maxOccurs="1"/>
+                    <element name="TypeInfo" type="rm:TypeInfoType" minOccurs="0"
+                   maxOccurs="1"/>
+                    <element name="Keyword" type="rm:ValueListType" minOccurs="0"
+                   maxOccurs="unbounded"/>
+                    <element name="Description" type="rm:DescriptionType" minOccurs="0"
+                   maxOccurs="1"/>
+                    <element name="Credentials" type="rm:CredentialsType" minOccurs="0"
+                   maxOccurs="1"/>
+                    <element name="Certifications" type="rm:CertificationsType"
+                   minOccurs="0" maxOccurs="1"/>
+                    <element name="SpecialRequirements"
+                   type="rm:SpecialRequirementsType" minOccurs="0" maxOccurs="1"/>
+                    <element name="ResponsibleParty" type="rm:ContactInformationType"
+                   minOccurs="0" maxOccurs="1"/>
+                    <element name="OwnershipInformation"
+                   type="rm:OwnershipInformationType" minOccurs="0" maxOccurs="1"/>
+                    <element name="ResourceStatus" minOccurs="0" maxOccurs="1">
+                      <complexType>
+                        <sequence>
+                          <element name="DeploymentStatus" type="rm:ValueListType"
+                         minOccurs="0" maxOccurs="1"/>
+                          <element name="Availability" type="rm:AvailabilityType"
+                         minOccurs="0" maxOccurs="1"/>
+                        </sequence>
+                      </complexType>
+                    </element>
+                  </sequence>
+                </complexType>
+              </element>
+              <element name="AssignmentInformation" minOccurs="0" maxOccurs="1">
+                <complexType>
+                  <sequence>
+                    <element name="Quantity" type="rm:QuantityType" minOccurs="0"
+                   maxOccurs="1"/>
+                    <element name="Restrictions" type="rm:RestrictionsType"
+                   minOccurs="0" maxOccurs="1"/>
+                    <element name="AnticipatedFunction"
+                   type="rm:AnticipatedFunctionType" minOccurs="0" maxOccurs="1"/>
+                    <element name="PriceQuote" type="rm:PriceQuoteType" minOccurs="0"
+                   maxOccurs="1"/>
+                    <element name="OrderID" type="rm:OrderIDType" minOccurs="0"
+                   maxOccurs="1"/>
+                    <element name="AssignmentInstructions"
+                   type="rm:AssignmentInstructionsType" minOccurs="0" maxOccurs="1"/>
+                  </sequence>
+                </complexType>
+              </element>
+              <element name="ScheduleInformation" minOccurs="0" maxOccurs="unbounded">
+                <complexType>
+                  <sequence>
+                    <element name="ScheduleType">
+                      <simpleType>
+                        <restriction base="rm:ScheduleTypeType">
+                          <enumeration value="EndAvailable"/>
+                          <enumeration value="RequestedArrival"/>
+                          <enumeration value="EstimatedArrival"/>
+                          <enumeration value="ActualArrival"/>
+                          <enumeration value="RequestedDeparture"/>
+                          <enumeration value="EstimatedDeparture"/>
+                          <enumeration value="ActualDeparture"/>
+                          <enumeration value="RequestedReturnArrival"/>
+                          <enumeration value="Committed"/>
+                          <enumeration value="ReportTo"/>
+                          <enumeration value="RequestedReturnDeparture"/>
+                          <enumeration value="EstimatedReturnDeparture"/>
+                          <enumeration value="EstimatedReturnArrival"/>
+                          <enumeration value="Route"/>
+                        </restriction>
+                      </simpleType>
+                    </element>
+                    <element name="DateTime" type="rm:DateTimeType" minOccurs="0"
+                   maxOccurs="1"/>
+                    <element name="Location" type="rm:LocationType" minOccurs="0"
+                   maxOccurs="1"/>
+                  </sequence>
+                </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+      </sequence>
+    </complexType>
+  </element>
+</schema>

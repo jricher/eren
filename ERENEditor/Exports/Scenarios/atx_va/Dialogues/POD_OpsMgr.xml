@@ -1,0 +1,109 @@
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0"
+  xmlns:cs="http://commons.apache.org/scxml" xmlns:cst="urn:mitre:eren:dlg:custom:1.0"
+  xmlns:dlg="urn:mitre:eren:dlg:1.0" xmlns:eren="urn:mitre:eren:1.0"
+  xmlns:xpil="urn:oasis:names:tc:ciq:xpil:3"
+  xmlns:xnl="urn:oasis:names:tc:ciq:xnl:3"
+  xmlns:msg="urn:oasis:names:tc:emergency:EDXL:RM:1.0:msg"
+  xmlns:xi="http://www.w3.org/2001/XInclude" 
+   id="POD_OpsMgr" initialstate="POD_OpsMgr:waitForPODReady" >
+	
+
+
+	<state id="POD_OpsMgr:waitForPODReady">
+
+	<onentry>
+		<cs:var name="precedingMsg" expr="''" />
+		<cs:var name="originatingMsg" expr="''" />
+	</onentry>
+  
+		<transition event="status.report" cond="_eventdata.isResourceReady(podID)"
+			target="POD_OpsMgr:askOpen">
+			<assign name="precedingMsg" expr="_eventdata.getMessageID()" />
+			<assign name="originatingMsg" expr="_eventdata.getOriginatingMessageID()" />
+		</transition>
+	</state>
+
+	<state id="POD_OpsMgr:askOpen">
+		<onentry>
+			<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+			<cs:var name="addressee" expr="'EOCdir'"/>
+			<cs:var name="messageType" expr="'question'" />
+			<cs:var name="messageSummary" expr="'Open POD?'" />
+			<cs:var name="messageText" expr="dm.getPodName(podID)+' is ready. Do you want to announce it to the public now?'" />
+			<cs:var name="messageLocation" expr="podID"/>
+			<cs:var name="numResponses" expr="2"/>
+      <cs:var name="responseID0" expr="messageID+':0'"/>
+			<cs:var name="shortResponse0" expr="'Now'" />
+			<cs:var name="longResponse0" expr="'Let'+dm.getApostrophe()+'s announce it now so that people can start getting treated right away.'" />
+      <cs:var name="responseID1" expr="messageID+':1'"/>
+			<cs:var name="shortResponse1" expr="'Later'" />
+			<cs:var name="longResponse1" expr="'I think we should wait until we have some more facilities open so that we don'+dm.getApostrophe()+'t get a crowd there.'" />
+			<cst:sendUserMessage />
+		</onentry>
+
+		<transition event="user.input"
+			cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID0"
+			target="POD_OpsMgr:askAnnouncePOD" />
+		<transition event="user.input"
+			cond="_eventdata.getMessageID() eq messageID and _eventdata.getResponseID() eq responseID1"
+			target="POD_OpsMgr:openLater" />
+	</state>
+
+	<state id="POD_OpsMgr:askAnnouncePOD">
+		<onentry>
+			<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+      <cs:var name="addressee" expr="'Comms'"/>
+      <cs:var name="messageType" expr="'inform'" />
+			<cs:var name="messageSummary" expr="'Announce POD Opening'" />
+			<cs:var name="messageText" expr="'The first POD is ready to open at '+dm.getPodName(podID)+'. Please prepare a press release to announce the opening to the public.'" />
+      <cs:var name="messageLocation" expr="podID"/>
+      <cs:var name="numResponses" expr="0"/>
+			<cst:sendUserMessage />
+		</onentry>
+		<transition cond="_eventdata.getMessageID() eq messageID" event="user.input" target="POD_OpsMgr:openNow" />
+	</state>
+
+	<state id="POD_OpsMgr:openNow">
+		<onentry>
+      <cs:var name="timestamp" expr="dm.getCurrentDate()"/>
+      <cst:sendOpenPod />
+    </onentry>
+		<transition target="POD_OpsMgr:running" />
+	</state>
+
+
+	<state id="POD_OpsMgr:openLater">
+		<onentry>
+			<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+      <cs:var name="addressee" expr="'Comms'"/>
+      <cs:var name="messageType" expr="'inform'" />
+			<cs:var name="messageSummary" expr="'Waiting to open '+dm.getPodName(podID)" />
+			<cs:var name="messageText" expr="'Ok, I will wait 30 seconds and ask you again'" />
+      <cs:var name="numResponses" expr="0"/>
+			<cst:sendUserMessage />
+			<cst:startTimer time="30" event="'ask.open'" ownerVar="msgSrc" />
+		</onentry>
+		<transition event="ask.open" cond="_eventdata.getMessageID() eq messageID"
+			target="POD_OpsMgr:askOpen" />
+	</state>
+
+	<state id="POD_OpsMgr:running">
+		<onentry>
+			<cs:var name="podName" expr="dm.getPodName(podID)" />
+      <cs:var name="addressee" expr="'Comms'"/>
+      <cs:var name="messageType" expr="'inform'" />
+			<cs:var name="messageID" expr="dm.nextMessageId(msgSrc)" />
+			<cs:var name="messageSummary" expr="podName+' is open'" />
+			<cs:var name="messageText" expr="podName+' is now open to the public.'" />
+      <cs:var name="numResponses" expr="0"/>
+			<cst:sendUserMessage />
+		</onentry>
+		<transition event="status.report" cond="_eventdata.isResourceReleased(podID)"
+			target="POD_OpsMgr:shutdownPOD" />
+	</state>
+
+	<state id="POD_OpsMgr:shutdownPOD" final="true" />
+
+
+</scxml>
+    

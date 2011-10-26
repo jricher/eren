@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<docProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <pageTitle>EREN</pageTitle>
+  <classPaths>C:\Users\amandac\Documents\EREN Project\EREN-rev-2\FlashClient2\EREN\src</classPaths>
+  <sourcesList />
+  <outputDirectory>C:\Users\amandac\Documents\EREN Project\EREN-rev-2\FlashClient2\documentation\docs</outputDirectory>
+  <activeCompiler>1</activeCompiler>
+  <extraOptions>-target-player=10.1 -library-path="C:\Users\amandac\Documents\EREN Project\EREN-rev-2\FlashClient2\EREN\resources\libraries" -source-path="C:\Users\amandac\Documents\EREN Project\EREN-rev-2\FlashClient2\EREN\src" </extraOptions>
+</docProject>
