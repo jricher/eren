@@ -1,0 +1,1 @@
+The Emergency Response Experimentation Network, EREN, is a modular architecture and platform for building serious games in the emergency preparedness and response domain. While EREN is built around the design of a resource management game, EREN is intended to allow for a wide variety of gameplay and simulation.
